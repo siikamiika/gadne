@@ -2,7 +2,7 @@ import urllib.request
 import datetime
 import sys
 
-def lounas(arguments):
+def lounas(paikka, arguments):
 
 	days = ['ma', 'ti', 'ke', 'to', 'pe', 'la', 'su']
 	date = datetime.datetime.now()
@@ -19,14 +19,14 @@ def lounas(arguments):
 			paiva = date.weekday()
 	
 	try:
-		assari = urllib.request.urlopen('http://www.unica.fi/fi/ravintolat/assarin-ullakko/').read().decode()
-		assari = assari.split('h4 data-dayofweek')[1:]
-		yodawg = []
+		unica = urllib.request.urlopen('http://www.unica.fi/fi/ravintolat/'+paikka).read().decode()
+		unica = unica.split('h4 data-dayofweek')[1:]
+		htmlsucks = []
 		ret = days[paiva] + ': '
-		for idx, val in enumerate(assari):
-			yodawg.append(val.split('class="lunch">')[1:])
-		if len(yodawg) > paiva:
-			for idx, val in enumerate(yodawg[paiva]):
+		for idx, val in enumerate(unica):
+			htmlsucks.append(val.split('class="lunch">')[1:])
+		if len(htmlsucks) > paiva:
+			for idx, val in enumerate(htmlsucks[paiva]):
 				tmp = val.split('\n')
 				ret += '| ' + tmp[6].split('/')[0].strip() + ' ' + tmp[0][:-5] + ' |'
 		return ret

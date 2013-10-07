@@ -4,9 +4,8 @@ import getpass
 from optparse import OptionParser
 
 import sleekxmpp
-import modules.assari
+import modules.unica
 import modules.sodexo
-import modules.tottisalmi
 import modules.turkuweather
 
 class MUCBot(sleekxmpp.ClientXMPP):
@@ -37,11 +36,11 @@ class MUCBot(sleekxmpp.ClientXMPP):
 		if len(msg_args) != 0 and msg['mucnick'] != self.nick:
 			viesti = ''
 			if msg_args[0] == '!assari':
-				viesti = modules.assari.lounas(msg_args[1:])
+				viesti = modules.unica.lounas('assarin-ullakko/', msg_args[1:])
 			if msg_args[0] == '!ict':
 				viesti = modules.sodexo.lounas(msg_args[1:])
 			if msg_args[0] == '!tottis':
-				viesti = modules.tottisalmi.lounas(msg_args[1:])
+				viesti = modules.unica.lounas('tottisalmi/', msg_args[1:])
 			if msg_args[0] == '!sää':
 				viesti = modules.turkuweather.weather(msg_args[1:])
 			for a in msg_args:
