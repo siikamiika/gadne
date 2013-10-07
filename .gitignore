@@ -1,16 +1,5 @@
 *.py[co]
-build/
-dist/
-MANIFEST
-docs/_build/
 *.swp
-.tox/
-.coverage
-sleekxmpp.egg-info/
-.ropeproject/
-4913
 *~
-.baboon/
-.DS_STORE
 *.bat
 sleekxmpp/
