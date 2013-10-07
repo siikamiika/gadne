@@ -5,7 +5,7 @@ import sys
 
 def weather(arguments):
 	date = datetime.datetime.now()
-	deg = u'\N{DEGREE SIGN}C '
+	deg = '\N{DEGREE SIGN}C '
 	try:
 		delta = int(arguments[0])
 		if delta < 0:
