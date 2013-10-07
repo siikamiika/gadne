@@ -13,3 +13,4 @@ sleekxmpp.egg-info/
 .baboon/
 .DS_STORE
 *.bat
+sleekxmpp/
