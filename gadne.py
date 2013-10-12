@@ -22,6 +22,7 @@ class MUCBot(sleekxmpp.ClientXMPP):
 		self.nick = nick
 		self.add_event_handler("session_start", self.start)
 		self.add_event_handler("groupchat_message", self.muc_message)
+		self.add_event_handler("muc::%s::got_online" % self.room, self.muc_online)
 
 	def start(self, event):
 
@@ -34,8 +35,6 @@ class MUCBot(sleekxmpp.ClientXMPP):
 										wait=True)
 
 	def muc_message(self, msg):
-
-	
 
 		msg_args = msg['body'].split()
 
@@ -52,7 +51,8 @@ class MUCBot(sleekxmpp.ClientXMPP):
 			if msg_args[0] == '!sää':
 				viesti = modules.turkuweather.weather(msg_args[1:])
 			for a in msg_args:
-				if a is not None and urlmatch.search(a):
+				if a is not None and urlmatch.search(a) and not doodlebot:
+					print(doodlebot)
 					self.send_message(mto=msg['from'].bare, mbody=modules.title.get(a), mtype='groupchat')
 				if a.startswith('gnu') or a == ':gnu:':
 					viesti = 'hehe gnu gnu'
@@ -61,7 +61,9 @@ class MUCBot(sleekxmpp.ClientXMPP):
 
 			if viesti != '':
 				self.send_message(mto=msg['from'].bare, mbody=viesti, mtype='groupchat')
+				
 
+asd
 if __name__ == '__main__':
 
 	optp = OptionParser()
