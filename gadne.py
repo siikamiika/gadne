@@ -1,12 +1,16 @@
 import sys
 import logging
 import getpass
+import os
+import datetime
+import re
 from optparse import OptionParser
 
 import sleekxmpp
 import modules.unica
 import modules.sodexo
 import modules.turkuweather
+import modules.title
 
 class MUCBot(sleekxmpp.ClientXMPP):
 
@@ -31,9 +35,13 @@ class MUCBot(sleekxmpp.ClientXMPP):
 
 	def muc_message(self, msg):
 
+	
+
 		msg_args = msg['body'].split()
 
 		if len(msg_args) != 0 and msg['mucnick'] != self.nick:
+			time = datetime.datetime.now().strftime('%Y/%m/%d %H:%M:%S ')
+			open('chatlog.log', 'a').write(time+str(msg['from'])+'/'+msg['id']+': '+msg['body'].replace('\n', '')+'\n')
 			viesti = ''
 			if msg_args[0] == '!assari':
 				viesti = modules.unica.lounas('assarin-ullakko/', msg_args[1:])
@@ -44,6 +52,8 @@ class MUCBot(sleekxmpp.ClientXMPP):
 			if msg_args[0] == '!sää':
 				viesti = modules.turkuweather.weather(msg_args[1:])
 			for a in msg_args:
+				if a is not None and urlmatch.search(a):
+					self.send_message(mto=msg['from'].bare, mbody=modules.title.get(a), mtype='groupchat')
 				if a.startswith('gnu') or a == ':gnu:':
 					viesti = 'hehe gnu gnu'
 				if a.startswith('läskihomo'):
@@ -82,6 +92,7 @@ if __name__ == '__main__':
 	xmpp.register_plugin('xep_0030') # Service Discovery
 	xmpp.register_plugin('xep_0045') # Multi-User Chat
 	xmpp.register_plugin('xep_0199') # XMPP Ping
+	urlmatch = re.compile(r'^https?://(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+[A-Z]{2,6}\.?|localhost|\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})(?::\d+)?(?:/?|[/?]\S+)$', re.I)
 
 	if xmpp.connect():
 		xmpp.process(block=True)
