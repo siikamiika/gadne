@@ -51,8 +51,7 @@ class MUCBot(sleekxmpp.ClientXMPP):
 			if msg_args[0] == '!sää':
 				viesti = modules.turkuweather.weather(msg_args[1:])
 			for a in msg_args:
-				if a is not None and urlmatch.search(a) and not doodlebot:
-					print(doodlebot)
+				if a is not None and urlmatch.search(a):
 					self.send_message(mto=msg['from'].bare, mbody=modules.title.get(a), mtype='groupchat')
 				if a.startswith('gnu') or a == ':gnu:':
 					viesti = 'hehe gnu gnu'
@@ -63,7 +62,6 @@ class MUCBot(sleekxmpp.ClientXMPP):
 				self.send_message(mto=msg['from'].bare, mbody=viesti, mtype='groupchat')
 				
 
-asd
 if __name__ == '__main__':
 
 	optp = OptionParser()
