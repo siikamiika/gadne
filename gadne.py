@@ -12,6 +12,10 @@ import modules.sodexo
 import modules.turkuweather
 import modules.title
 
+otsikko = True
+urlmatch = re.compile(r'^https?://(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+[A-Z]{2,6}\.?|localhost|\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})(?::\d+)?(?:/?|[/?]\S+)$', re.I)
+
+
 class MUCBot(sleekxmpp.ClientXMPP):
 
 	def __init__(self, jid, password, room, nick):
@@ -97,8 +101,6 @@ if __name__ == '__main__':
 	xmpp.register_plugin('xep_0030') # Service Discovery
 	xmpp.register_plugin('xep_0045') # Multi-User Chat
 	xmpp.register_plugin('xep_0199') # XMPP Ping
-	urlmatch = re.compile(r'^https?://(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+[A-Z]{2,6}\.?|localhost|\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})(?::\d+)?(?:/?|[/?]\S+)$', re.I)
-	otsikko = True
 
 	if xmpp.connect():
 		xmpp.process(block=True)
