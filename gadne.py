@@ -12,10 +12,6 @@ import modules.sodexo
 import modules.turkuweather
 import modules.title
 
-otsikko = True
-urlmatch = re.compile(r'^https?://(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+[A-Z]{2,6}\.?|localhost|\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})(?::\d+)?(?:/?|[/?]\S+)$', re.I)
-
-
 class MUCBot(sleekxmpp.ClientXMPP):
 
 	def __init__(self, jid, password, room, nick):
@@ -53,14 +49,8 @@ class MUCBot(sleekxmpp.ClientXMPP):
 				viesti = modules.unica.lounas('tottisalmi/', msg_args[1:])
 			if msg_args[0] == '!sää':
 				viesti = modules.turkuweather.weather(msg_args[1:])
-			if msg_args[0] == '!otsikko':
-				otsikko = not otsikko
-				if otsikko:
-					viesti = 'otsikot päällä'
-				if not otsikko:
-					viesti = 'otsikot pois'
 			for a in msg_args:
-				if a is not None and urlmatch.search(a) and otsikko:
+				if a is not None and urlmatch.search(a):
 					self.send_message(mto=msg['from'].bare, mbody=modules.title.get(a), mtype='groupchat')
 				if a.startswith('gnu') or a == ':gnu:':
 					viesti = 'hehe gnu gnu'
@@ -101,6 +91,7 @@ if __name__ == '__main__':
 	xmpp.register_plugin('xep_0030') # Service Discovery
 	xmpp.register_plugin('xep_0045') # Multi-User Chat
 	xmpp.register_plugin('xep_0199') # XMPP Ping
+	urlmatch = re.compile(r'^https?://(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+[A-Z]{2,6}\.?|localhost|\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})(?::\d+)?(?:/?|[/?]\S+)$', re.I)
 
 	if xmpp.connect():
 		xmpp.process(block=True)
