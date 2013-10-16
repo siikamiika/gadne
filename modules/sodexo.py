@@ -28,13 +28,13 @@ def lounas(arguments):
 			ret += days[date.weekday()] + ': '
 			for ruoka in ruokalista['courses']:
 				ret += '| ' + ruoka['price'].split('/')[0] + ruoka['title_fi'] + ' |'
-			ret += '\n'
 			if koko == False:
 				break
+			paiva += 1
 			if paiva > 4:
 				break
+			ret += '\n'
 			date += datetime.timedelta(days=1)
-			paiva += 1
 		return ret
 	except:
 		return 'jotain hajos'

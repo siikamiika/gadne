@@ -35,12 +35,12 @@ def lounas(paikka, arguments):
 				for idx, val in enumerate(htmlsucks[paiva]):
 					tmp = val.split('\n')
 					ret += '| ' + tmp[6].split('/')[0].strip() + ' ' + tmp[0][:-5] + ' |'
-				ret += '\n'
 			if koko == False:
 				break
+			paiva += 1
 			if len(htmlsucks) <= paiva:
 				break
-			paiva += 1
+			ret += '\n'
 		return ret
 	except:
 		return 'jotain hajos'
