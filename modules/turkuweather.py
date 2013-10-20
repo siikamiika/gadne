@@ -1,7 +1,6 @@
 import urllib.request
 import datetime
 import json
-import sys
 
 def weather(arguments):
 	date = datetime.datetime.now()
