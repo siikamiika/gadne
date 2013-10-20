@@ -54,7 +54,7 @@ class MUCBot(sleekxmpp.ClientXMPP):
 					self.send_message(mto=msg['from'].bare, mbody=modules.title.get(a), mtype='groupchat')
 				if a.startswith('gnu') or a == ':gnu:':
 					viesti = 'hehe gnu gnu'
-				if a.startswith('läskihomo'):
+				if a.startswith('läski'):
 					viesti = ':laihduta:'
 
 			if viesti != '':
