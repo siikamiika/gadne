@@ -5,8 +5,8 @@ import re
 
 def info(url):
 	try:
-		match = re.search('(youtube\.com/watch\?v=|youtube\.com/v/|youtu\.be/)(.*?)(\?|&|$)', url)
-		videoid = match.group(2)
+		match = re.search('(?:youtube\.com/|youtu\.be)(?:.*?v=|.*?embed/|.*?v/|/)(.{11})', url)
+		videoid = match.group(1)
 		jsondata = json.loads(urllib.request.urlopen('http://gdata.youtube.com/feeds/api/videos/'+videoid+'?v=2&alt=jsonc').read().decode())
 		video = jsondata['data']
 		kesto = ' ('+str(datetime.timedelta(seconds=video['duration'])).lstrip('0:')+')'
