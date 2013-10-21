@@ -49,6 +49,9 @@ class MUCBot(sleekxmpp.ClientXMPP):
 				viesti = modules.unica.lounas('tottisalmi/', msg_args[1:])
 			if msg_args[0] == '!sää':
 				viesti = modules.turkuweather.weather(msg_args[1:])
+			if 'nonyt' in ''.join(msg['body'].lower().split()):
+				self.send_message(mto=msg['from'].bare, mbody='NO NYT :hammer:', mtype='groupchat')
+
 			for a in msg_args:
 				if a is not None:
 					ytinfo = modules.youtube.info(a)
