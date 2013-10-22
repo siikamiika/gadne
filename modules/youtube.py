@@ -5,6 +5,7 @@ import re
 
 def info(url):
 	try:
+		url = urllib.request.urlopen(url).geturl()
 		match = re.search('(?:youtube\.com/|youtu\.be)(?:.*?v=|.*?embed/|.*?v/|/)(.{11})', url)
 		videoid = match.group(1)
 		jsondata = json.loads(urllib.request.urlopen('http://gdata.youtube.com/feeds/api/videos/'+videoid+'?v=2&alt=jsonc').read().decode())
