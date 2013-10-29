@@ -4,3 +4,5 @@
 *.bat
 sleekxmpp/
 *.log
+*.sh
+*.html

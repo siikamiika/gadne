@@ -11,6 +11,7 @@ import modules.unica
 import modules.sodexo
 import modules.turkuweather
 import modules.youtube
+import modules.bus
 
 class MUCBot(sleekxmpp.ClientXMPP):
 
@@ -49,6 +50,8 @@ class MUCBot(sleekxmpp.ClientXMPP):
 				viesti = modules.unica.lounas('tottisalmi/', msg_args[1:])
 			if msg_args[0] == '!sää':
 				viesti = modules.turkuweather.weather(msg_args[1:])
+			if msg_args[0] == '!bus':
+				viesti = modules.bus.aikataulu(msg_args[1:])
 			if 'nonyt' in ''.join(msg['body'].lower().split()):
 				self.send_message(mto=msg['from'].bare, mbody='NO NYT :hammer:', mtype='groupchat')
 
