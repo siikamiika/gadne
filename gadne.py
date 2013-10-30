@@ -48,6 +48,8 @@ class MUCBot(sleekxmpp.ClientXMPP):
 				viesti = modules.sodexo.lounas(msg_args[1:])
 			if msg_args[0] == '!tottis':
 				viesti = modules.unica.lounas('tottisalmi/', msg_args[1:])
+			if msg_args[0] == '!delica':
+				viesti = modules.unica.lounas('delica/', msg_args[1:])
 			if msg_args[0] == '!sää':
 				viesti = modules.turkuweather.weather(msg_args[1:])
 			if msg_args[0] == '!bus':
