@@ -53,7 +53,8 @@ class MUCBot(sleekxmpp.ClientXMPP):
 			if msg_args[0] == '!sää':
 				viesti = modules.turkuweather.weather(msg_args[1:])
 			if msg_args[0] == '!bus':
-				viesti = modules.bus.aikataulu(msg_args[1:])
+				self.send_message(mto=msg['from'], mbody=modules.bus.aikataulu(msg_args[1:]), mtype='chat')
+				viesti = 'pm\'d'
 			if 'nonyt' in ''.join(msg['body'].lower().split()):
 				self.send_message(mto=msg['from'].bare, mbody='NO NYT :hammer:', mtype='groupchat')
 
