@@ -43,7 +43,7 @@ class MUCBot(sleekxmpp.ClientXMPP):
 			open('chatlog.log', 'a').write(time+str(msg['from'])+'/'+msg['id']+': '+msg['body'].replace('\n', '')+'\n')
 			viesti = ''
 			if msg_args[0] == '!assari':
-				viesti = modules.unica_beautifulsoup.lounas('assarin-ullakko/', msg_args[1:])
+				viesti = modules.unica.lounas('assarin-ullakko/', msg_args[1:])
 			if msg_args[0] == '!ict':
 				viesti = modules.sodexo.lounas(msg_args[1:])
 			if msg_args[0] == '!tottis':
