@@ -12,6 +12,7 @@ import modules.sodexo
 import modules.turkuweather
 import modules.youtube
 import modules.bus
+import modules.cleverbot
 
 class MUCBot(sleekxmpp.ClientXMPP):
 
@@ -54,6 +55,10 @@ class MUCBot(sleekxmpp.ClientXMPP):
 				viesti = modules.turkuweather.weather(msg_args[1:])
 			if msg_args[0] == '!bus':
 				self.send_message(mto=msg['from'], mbody=modules.bus.aikataulu(msg_args[1:], str(msg['mucnick'])), mtype='chat')
+			if msg_args[0] == 'gadne:':
+				kysymys = msg['body'].lstrip('gadne: ')
+				vastaus = modules.cleverbot.Cleverbot().ask(kysymys)
+				self.send_message(mto=msg['from'].bare, mbody=vastaus, mtype='groupchat')
 			if 'nonyt' in ''.join(msg['body'].lower().split()):
 				self.send_message(mto=msg['from'].bare, mbody='NO NYT :hammer:', mtype='groupchat')
 
