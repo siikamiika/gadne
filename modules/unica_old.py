@@ -1,13 +1,10 @@
 import urllib.request
 import datetime
 import sys
-from bs4 import BeautifulSoup
-import html5lib
 
 def lounas(paikka, arguments):
 
 	days = ['ma', 'ti', 'ke', 'to', 'pe', 'la', 'su']
-	htmldays = ['Maanantai', 'Tiistai', 'Keskiviikko', 'Torstai', 'Perjantai', 'Lauantai', 'Sunnuntai']
 	date = datetime.datetime.now()
 	koko = False
 
@@ -27,14 +24,23 @@ def lounas(paikka, arguments):
 	
 	try:
 		unica = urllib.request.urlopen('http://www.unica.fi/fi/ravintolat/'+paikka).read().decode()
-		soppa = BeautifulSoup(unica, 'html5lib')
-		menuitems = soppa.find_all('div', {'class':'accord'})
-		daystrings = []
-		for menuitem in menuitems:
-			daystring = ''
-			for lunch in menuitem.find_all('tr'):
-				daystring += lunch.find("td", {"class":"price quiet"}).next_element.split("Hinta:")[1].split("/")[0].strip()+' '
-				daystring += ' | '+lunch.find("td", {"class":"lunch"}).next_element
-			daystrings.append(daystring)
+		unica = unica.split('h4 data-dayofweek')[1:]
+		ret = ''
+		while 1:
+			htmlsucks = []
+			ret += days[paiva] + ': '
+			for idx, val in enumerate(unica):
+				htmlsucks.append(val.split('class="lunch">')[1:])
+			if len(htmlsucks) > paiva:
+				for idx, val in enumerate(htmlsucks[paiva]):
+					tmp = val.split('\n')
+					ret += '| ' + tmp[6].split('/')[0].strip() + ' ' + tmp[0][:-5] + ' |'
+			if koko == False:
+				break
+			paiva += 1
+			if len(htmlsucks) <= paiva:
+				break
+			ret += '\n'
+		return ret
 	except:
 		return 'jotain hajos'
