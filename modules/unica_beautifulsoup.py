@@ -30,26 +30,11 @@ def lounas(paikka, arguments):
 		soppa = BeautifulSoup(unica, 'html5lib')
 		menuitems = soppa.find_all('div', {'class':'accord'})
 		daystrings = []
-		for menuday in menuitems:
+		for menuitem in menuitems:
 			daystring = ''
-
-			daystrings.append()
-		ret = ''
-		while 1:
-			htmlsucks = []
-			ret += days[paiva] + ': '
-			for idx, val in enumerate(unica):
-				htmlsucks.append(val.split('class="lunch">')[1:])
-			if len(htmlsucks) > paiva:
-				for idx, val in enumerate(htmlsucks[paiva]):
-					tmp = val.split('\n')
-					ret += '| ' + tmp[6].split('/')[0].strip() + ' ' + tmp[0][:-5] + ' |'
-			if koko == False:
-				break
-			paiva += 1
-			if len(htmlsucks) <= paiva:
-				break
-			ret += '\n'
-		return ret
+			for lunch in menuitem.find_all('tr'):
+				daystring += lunch.find("td", {"class":"price quiet"}).next_element.split("Hinta:")[1].split("/")[0].strip()+' '
+				daystring += ' | '+lunch.find("td", {"class":"lunch"}).next_element
+			daystrings.append(daystring)
 	except:
 		return 'jotain hajos'

@@ -8,6 +8,7 @@ from optparse import OptionParser
 
 import sleekxmpp
 import modules.unica
+import modules.unica_beautifulsoup
 import modules.sodexo
 import modules.turkuweather
 import modules.youtube
@@ -43,7 +44,7 @@ class MUCBot(sleekxmpp.ClientXMPP):
 			open('chatlog.log', 'a').write(time+str(msg['from'])+'/'+msg['id']+': '+msg['body'].replace('\n', '')+'\n')
 			viesti = ''
 			if msg_args[0] == '!assari':
-				viesti = modules.unica.lounas('assarin-ullakko/', msg_args[1:])
+				viesti = modules.unica_beautifulsoup.lounas('assarin-ullakko/', msg_args[1:])
 			if msg_args[0] == '!ict':
 				viesti = modules.sodexo.lounas(msg_args[1:])
 			if msg_args[0] == '!tottis':
@@ -54,7 +55,6 @@ class MUCBot(sleekxmpp.ClientXMPP):
 				viesti = modules.turkuweather.weather(msg_args[1:])
 			if msg_args[0] == '!bus':
 				self.send_message(mto=msg['from'], mbody=modules.bus.aikataulu(msg_args[1:]), mtype='chat')
-				viesti = 'pm\'d'
 			if 'nonyt' in ''.join(msg['body'].lower().split()):
 				self.send_message(mto=msg['from'].bare, mbody='NO NYT :hammer:', mtype='groupchat')
 
