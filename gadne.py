@@ -8,7 +8,6 @@ from optparse import OptionParser
 
 import sleekxmpp
 import modules.unica
-import modules.unica_beautifulsoup
 import modules.sodexo
 import modules.turkuweather
 import modules.youtube
