@@ -1,6 +1,7 @@
 from hashlib import md5
 import pprint
 import urllib.request, urllib.parse, urllib.error, urllib.request, urllib.error, urllib.parse
+import html.parser
 
 
 class Cleverbot:
@@ -13,7 +14,7 @@ class Cleverbot:
     DEBUG = False
 
     headers = \
-        { 'User-Agent' : 'Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.0)'
+        { 'User-Agent' : 'Mozilla/5.0 (Windows; U; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 2.0.50727)'
         , 'Accept' : 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
         , 'Accept-Charset' : 'ISO-8859-1,utf-8;q=0.7,*;q=0.7'
         , 'Accept-Language' : 'en-us,en;q=0.8,en-us;q=0.5,en;q=0.3'
@@ -89,7 +90,7 @@ class Cleverbot:
         # Add Cleverbot's reply to the conversation log
         self.conversation.append(parsed['answer'])
 
-        return parsed['answer']
+        return html.parser.HTMLParser().unescape(parsed['answer'])
 
     def _send(self):
         """POST the user's question and all required information to the 
