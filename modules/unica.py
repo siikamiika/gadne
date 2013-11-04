@@ -35,7 +35,7 @@ def lounas(paikka, arguments):
 			try:
 				daystring += '| '
 				hinta = lunch.find("td", {"class":"price quiet"}).contents[0].split("Hinta:")[1].split("/")[0].strip()
-				daystring += re.sub('\n|\t|^.*?\s', '', hinta)+' '
+				daystring += re.sub('\n|\t', '', hinta)+' '
 			except:
 				pass
 			try:
