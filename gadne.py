@@ -67,7 +67,7 @@ class MUCBot(sleekxmpp.ClientXMPP):
 					ytinfo = modules.youtube.info(a)
 					if ytinfo != '':
 						self.send_message(mto=msg['from'].bare, mbody=ytinfo, mtype='groupchat')
-				if a.startswith('gnu') or a == ':gnu:':
+				if a.lower().startswith('gnu') or a == ':gnu:':
 					viesti = 'hehe gnu gnu'
 				if a.startswith('läski'):
 					viesti = ':laihduta:'
