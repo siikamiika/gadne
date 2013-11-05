@@ -60,7 +60,7 @@ class MUCBot(sleekxmpp.ClientXMPP):
 				vastaus = modules.cleverbot.Cleverbot().ask(kysymys)
 				self.send_message(mto=msg['from'].bare, mbody=vastaus, mtype='groupchat')
 			if 'nonyt' in ''.join(msg['body'].lower().split()):
-				self.send_message(mto=msg['from'].bare, mbody='NO NYT :hammer:', mtype='groupchat')
+				self.send_message(mto=msg['from'].bare, mbody='NO NYT :ghammer:', mtype='groupchat')
 
 			for a in msg_args:
 				if a is not None:
