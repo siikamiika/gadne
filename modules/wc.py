@@ -7,6 +7,6 @@ def count(sana):
 			chatlog = chatlog.read().decode('latin-1')
 	except IOError:
 		return 'ei voi lukea chatlogia'
-	nimet = re.findall('(?:random@conference\.eddykaykay\.pw/)(.*?)(?:/.*?:\s)(?:.*?)(?:'+sana+')', chatlog)
+	nimet = re.findall('(?:random@conference\.eddykaykay\.pw/)(.*?)(?:/.*?:\s)(?:.*?)(?:'+re.escape(sana)+')', chatlog)
 	wc = Counter(nimet)
 	return str(wc).lstrip('Counter')
