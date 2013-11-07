@@ -57,7 +57,7 @@ class MUCBot(sleekxmpp.ClientXMPP):
 			if msg_args[0] == '!bus':
 				self.send_message(mto=msg['from'], mbody=modules.bus.aikataulu(msg_args[1:], str(msg['mucnick'])), mtype='chat')
 			if msg_args[0] == '!wc':
-				self.send_message(mto=msg['from'].bare, mbody=modules.wc.count(' '.join(msg_args[1:])), mtype='groupchat')
+				self.send_message(mto=msg['from'].bare, mbody=modules.wc.count(msg), mtype='groupchat')
 			if msg_args[0] == 'gadne:':
 				kysymys = msg['body'].lstrip('gadne: ')
 				vastaus = modules.cleverbot.Cleverbot().ask(kysymys)
