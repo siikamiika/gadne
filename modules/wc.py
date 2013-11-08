@@ -2,16 +2,19 @@ import re
 from collections import Counter
 
 def count(msg):
+	viesti = msg['body'][4:]
 	try:
-		with open('chatlog.log', 'rb') as chatlog:
-			try:
+		try:
+			with open('chatlog.log', 'r') as chatlog:
+				chatlog = chatlog.read()
+		except UnicodeDecodeError:
+			with open('chatlog.log', 'rb') as chatlog:
 				chatlog = chatlog.read().decode()
-				viesti = msg['body'].lstrip('!wc ')
-			except UnicodeDecodeError:
-				chatlog = chatlog.read().decode('latin-1')
-				viesti = msg['body'].encode("latin-1").decode("latin-1").lstrip('!wc ')
 	except IOError:
 		return 'ei voi lukea chatlogia'
+	rivit = chatlog.split('\n')
+	rivit = [ rivi for rivi in rivit if not '!wc' in rivi ]
+	chatlog = '\n'.join(rivit)
 	nimet = re.findall('(?:'+msg['from'].bare+'/)(.*?)(?:/.*?:\s)(?:.*?)(?:'+re.escape(viesti)+')', chatlog)
 	wc = Counter(nimet)
 	return str(wc).lstrip('Counter')
