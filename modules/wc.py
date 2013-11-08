@@ -17,4 +17,7 @@ def count(msg):
 	chatlog = '\n'.join(rivit)
 	nimet = re.findall('(?:'+msg['from'].bare+'/)(.*?)(?:/.*?:\s)(?:.*?)(?:'+re.escape(viesti)+')', chatlog)
 	wc = Counter(nimet)
-	return str(wc).lstrip('Counter')
+	ret = ''
+	for nimi, kerrat in wc.items():
+		ret += nimi+': '+str(kerrat)+' '
+	return ret
