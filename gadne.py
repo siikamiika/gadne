@@ -58,6 +58,10 @@ class MUCBot(sleekxmpp.ClientXMPP):
 				self.send_message(mto=msg['from'], mbody=modules.bus.aikataulu(msg_args[1:], str(msg['mucnick'])), mtype='chat')
 			if msg_args[0] == '!wc':
 				self.send_message(mto=msg['from'].bare, mbody=modules.wc.count(msg), mtype='groupchat')
+			if msg_args[0] == '!pasi':
+				viesti = '!perjantai'
+			if msg['body'] = 'Kyllä, nyt on perjantai' and str(msg['mucnick']) == 'Doodlebot':
+				self.send_message(mto=msg['from'].bare, mbody=modules.pasi.radio(), mtype='groupchat')
 			if msg_args[0] == 'gadne:':
 				kysymys = msg['body'].lstrip('gadne: ')
 				vastaus = modules.cleverbot.Cleverbot().ask(kysymys)
