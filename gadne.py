@@ -14,6 +14,7 @@ import modules.youtube
 import modules.bus
 import modules.cleverbot
 import modules.wc
+import modules.pasi
 
 class MUCBot(sleekxmpp.ClientXMPP):
 
