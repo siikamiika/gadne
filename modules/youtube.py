@@ -11,7 +11,11 @@ def info(url):
 		jsondata = json.loads(urllib.request.urlopen('http://gdata.youtube.com/feeds/api/videos/'+videoid+'?v=2&alt=jsonc').read().decode())
 		video = jsondata['data']
 		kesto = ' ('+str(datetime.timedelta(seconds=video['duration']))+')'
-		nippelitieto = ' / '.join(['Aihe: '+video['category'], '{:,}'.format(video['viewCount'])+' katselukertaa', 'likeratio: '+str(round(video['rating']*20, 2))+'%'])
+		try:
+			likeratio = str(round((int(video['likeCount'])/video['ratingCount'])*100, 2))+'%'
+		except KeyError:
+			likeratio = 'ei ole'
+		nippelitieto = ' / '.join(['Aihe: '+video['category'], '{:,}'.format(video['viewCount'])+' katselukertaa', 'likeratio: '+likeratio])
 		ret = 'Youtube: '
 		ret += '['+video['uploader']+'] '+video['title']+kesto+' | '+nippelitieto
 	except:
