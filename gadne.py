@@ -83,6 +83,8 @@ class MUCBot(sleekxmpp.ClientXMPP):
 					viesti = ':laihduta:'
 				if a.lower().startswith('feel') or a.lower().startswith('tajuu'):
 					viesti = 'Yea, feel me. The beat is all in me.'
+				if a.lower().startswith('win'):
+					viesti = 'Juuh elikkäs joku Windows :grage:'
 			if viesti != '':
 				self.send_message(mto=msg['from'].bare, mbody=viesti, mtype='groupchat')
 				
