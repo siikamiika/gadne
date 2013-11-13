@@ -78,7 +78,10 @@ class MUCBot(sleekxmpp.ClientXMPP):
 				if a.lower().startswith('gnu') or a == ':gnu:':
 					viesti = 'hehe gnu gnu'
 				if a.lower().startswith('mad') or a == ':mad:':
-                                        viesti = ':kasetti:'
+					viesti = ':kasetti:'
+				if msg['body'].upper() == msg['body'] and len(msg['body']) >= 3 and ':' not in msg['body']:
+					viesti = ':kasetti:'
+					break
 				if a.startswith('läski'):
 					viesti = ':laihduta:'
 				if a.lower().startswith('feel') or a.lower().startswith('tajuu'):
