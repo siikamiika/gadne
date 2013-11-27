@@ -76,7 +76,7 @@ class MUCBot(sleekxmpp.ClientXMPP):
 					ytinfo = modules.youtube.info(a)
 					if ytinfo != '':
 						self.send_message(mto=msg['from'].bare, mbody=ytinfo, mtype='groupchat')
-				if re.match('http://.*?\.(gif|png|jpg|jpeg).*', a):
+				if re.match('https?://.*?\.(gif|png|jpe?g).*', a):
 					self.send_message(mto=msg['from'].bare, mbody=modules.revimg.desc(a), mtype='groupchat')
 				if a.lower().startswith('gnu') or a == ':gnu:':
 					viesti = 'hehe gnu gnu'
