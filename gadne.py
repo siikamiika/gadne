@@ -15,6 +15,7 @@ import modules.bus
 import modules.cleverbot
 import modules.wc
 import modules.pasi
+import modules.revimg
 
 class MUCBot(sleekxmpp.ClientXMPP):
 
@@ -75,11 +76,13 @@ class MUCBot(sleekxmpp.ClientXMPP):
 					ytinfo = modules.youtube.info(a)
 					if ytinfo != '':
 						self.send_message(mto=msg['from'].bare, mbody=ytinfo, mtype='groupchat')
+				if re.match('http://.*?\.(gif|png|jpg|jpeg).*', a):
+					self.send_message(mto=msg['from'].bare, mbody=modules.revimg.desc(a), mtype='groupchat')
 				if a.lower().startswith('gnu') or a == ':gnu:':
 					viesti = 'hehe gnu gnu'
 				if a.lower().startswith('mad') or a == ':mad:':
 					viesti = ':kasetti:'
-				if msg['body'].upper() == msg['body'] and len(msg['body']) >= 3 and ':' not in msg['body']:
+				if not re.findall('[a-z]|:', msg['body']) and len(re.findall('[A-Z]', msg['body'])) >= 3:
 					viesti = ':kasetti:'
 					break
 				if a.startswith('läski'):
