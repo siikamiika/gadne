@@ -11,9 +11,9 @@ req_getrandom.add_header('User-Agent', chromelinux)
 sivu = urllib.request.urlopen(req_getrandom).read()
 randomshit = re.search(b'<INPUT NAME=\'(.*?)\'', sivu).group(1).decode('latin-1')
 postdata = {
-	randomshit:sys.argv[1],
-	'submit':'',
-	'rnd':randomshit.lstrip('kysymys_')
+    randomshit:sys.argv[1],
+    'submit':'',
+    'rnd':randomshit.lstrip('kysymys_')
 }
 postdata = urllib.parse.urlencode(postdata).encode('latin-1')
 print('Debug: '+str(postdata))
