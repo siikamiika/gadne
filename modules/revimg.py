@@ -8,18 +8,15 @@ Python 3.3.3
 >>> import revimg
 >>> revimg.desc('http://static.iltalehti.fi/kuvat/navi/logo_iso.gif')
 'iltalehti'
-
 """
 import urllib.request
 import urllib.parse
 import re
 
 def desc(img):
-    desc = ''
     try:
         url = ('https://www.google.com/'
-              'searchbyimage?&image_url='+urllib.parse.quote(img)
-              )
+              'searchbyimage?&image_url='+urllib.parse.quote(img))
         req = urllib.request.Request(url)
         #impersonate Google Chrome on Windows 7 to get a proper result page
         req.add_header('User-Agent',
@@ -30,8 +27,7 @@ def desc(img):
         page = urllib.request.urlopen(req).read()
         match = re.search(b'Best guess for this image.*?>(.*?)</a>',
                           page, re.M) # keep newlines in same match
-        #if there's no description an empty sting will be returned
-        desc = match.group(1).decode()
+        return match.group(1).decode()
+    #if there's no description an empty sting will be returned
     except AttributeError:
-        pass
-    return desc
+        return ''
