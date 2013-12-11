@@ -17,7 +17,6 @@ import modules.wc
 import modules.pasi
 import modules.revimg
 import modules.title
-import modules.ict_temp
 
 class MUCBot(sleekxmpp.ClientXMPP):
 
@@ -51,7 +50,7 @@ class MUCBot(sleekxmpp.ClientXMPP):
             if msg_args[0] == '!assari':
                 viesti = modules.unica.lounas('assarin-ullakko/', msg_args[1:])
             if msg_args[0] == '!ict':
-                viesti = modules.ict_temp.lounas(msg_args[1:]) # my api ;__;
+                viesti = modules.sodexo.lounas(msg_args[1:])
             if msg_args[0] == '!tottis':
                 viesti = modules.unica.lounas('tottisalmi/', msg_args[1:])
             if msg_args[0] == '!delica':

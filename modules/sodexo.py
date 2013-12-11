@@ -24,7 +24,7 @@ def lounas(arguments):
     try:
         ret = ''
         while 1:
-            ruokalista = json.loads(urllib.request.urlopen('http://www.sodexo.fi/ruokalistat/output/daily_json/427/'+str(date.year)+'/'+str(date.month)+'/'+str(date.day)+'/fi').read().decode())
+            ruokalista = json.loads(urllib.request.urlopen('http://www.sodexo.fi/ruokalistat/output/daily_json/54/'+str(date.year)+'/'+str(date.month)+'/'+str(date.day)+'/fi').read().decode())
             ret += days[date.weekday()] + ': '
             for ruoka in ruokalista['courses']:
                 ret += '| ' + ruoka['price'].split('/')[0] + ruoka['title_fi'] + ' |'
