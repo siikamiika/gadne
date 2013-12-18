@@ -17,6 +17,7 @@ import modules.wc
 import modules.pasi
 import modules.revimg
 import modules.title
+import modules.katse
 
 class MUCBot(sleekxmpp.ClientXMPP):
 
@@ -47,6 +48,10 @@ class MUCBot(sleekxmpp.ClientXMPP):
             time = datetime.datetime.now().strftime('%Y/%m/%d %H:%M:%S ')
             open('chatlog.log', 'a').write(time+str(msg['from'])+'/'+msg['id']+': '+msg['body'].replace('\n', '')+'\n')
             viesti = ''
+            if msg_args[0] == '!btc':
+                viesti = modules.katse.katse('btc')
+            if msg_args[0] == '!ltc':
+                viesti = modules.katse.katse('ltc')
             if msg_args[0] == '!assari':
                 viesti = modules.unica.lounas('assarin-ullakko/', msg_args[1:])
             if msg_args[0] == '!ict':
