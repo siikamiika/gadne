@@ -52,14 +52,24 @@ class MUCBot(sleekxmpp.ClientXMPP):
                 viesti = modules.katse.katse('btc')
             if msg_args[0] == '!ltc':
                 viesti = modules.katse.katse('ltc')
-            if msg_args[0] == '!assari':
-                viesti = modules.unica.lounas('assarin-ullakko/', msg_args[1:])
             if msg_args[0] == '!ict':
                 viesti = modules.sodexo.lounas(msg_args[1:])
-            if msg_args[0] == '!tottis':
-                viesti = modules.unica.lounas('tottisalmi/', msg_args[1:])
-            if msg_args[0] == '!delica':
-                viesti = modules.unica.lounas('delica/', msg_args[1:])
+            unica = {
+                '!assari': 'assarin-ullakko/',
+                '!tottis': 'tottisalmi/',
+                '!delica': 'delica/',
+                '!brygge': 'brygge/',
+                '!deli': 'deli-pharma/',
+                '!dent': 'dental/',
+                '!mac': 'macciavelli/',
+                '!mikro': 'mikro/',
+                '!nutri': 'nutritio/',
+                '!rk': 'ruokakello/'
+            }
+            if msg_args[0] in unica:
+                viesti = modules.unica.lounas(unica[msg_args[0]], msg_args[1:])
+            if msg_args[0] == '!unica':
+                viesti = str(unica)
             if msg_args[0] == '!sää':
                 viesti = modules.turkuweather.weather(msg_args[1:])
             if msg_args[0] == '!bus':
