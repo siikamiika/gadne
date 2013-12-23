@@ -52,6 +52,8 @@ class MUCBot(sleekxmpp.ClientXMPP):
                 viesti = modules.katse.katse('btc')
             if msg_args[0] == '!ltc':
                 viesti = modules.katse.katse('ltc')
+            if msg_args[0] == '!xpm':
+                viesti = modules.katse.katse('xpm')
             if msg_args[0] == '!ict':
                 viesti = modules.sodexo.lounas(msg_args[1:])
             unica = {
