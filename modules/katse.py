@@ -6,20 +6,29 @@
 # mää räpeltämäs :gcomp:
 # by fisle
 #
-import urllib2
-import simplejson as json
+import urllib.request
+import json
 
 def katse(juuh):
         # Katse se BTC-e API
-        if katse == 'ltc':
-                URL = 'https://btc-e.com/api/2/ltc_usd/ticker'
-        elif katse == 'btc':
-                URL = 'https://btc-e.com/api/2/btc_usd/ticker'
-        response = urllib2.urlopen(URL)
-        html = response.read()
+        if juuh == 'ltc':
+            URL = 'ltc_usd'
+        elif juuh == 'btc':
+            URL = 'btc_usd'
+        elif juuh == 'xpm':
+            URL = 'xpm_btc'
+        URL = 'https://btc-e.com/api/2/{!s}/ticker'.format(URL)
+        gconf = urllib.request.urlopen(URL).read().decode()
         # Katse se JSON KUULIKKO
-        data = json.loads(html)
+        data = json.loads(gconf)
         last = data['ticker']['last']
-        last = 'Iham hyvä 1 {!s} = ${!s}, mitä mieltä muut :rolleyes:'.format(juuh, last)
+        # Mää laskemassa primecoin->usd =D
+        if juuh == 'xpm':
+            btc = URL.replace('xpm_btc', 'btc_usd')
+            btc = urllib.request.urlopen(btc).read().decode()
+            btc = json.loads(btc)
+            btc = btc['ticker']['last']
+            last = last * btc
+        last = 'Iham hyvä 1 {!s} = ${:f}, mitä mieltä muut :rolleyes:'.format(juuh, last)
         # Kuulim :o
         return last
