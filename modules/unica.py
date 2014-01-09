@@ -28,9 +28,10 @@ def lounas(paikka, arguments):
     unica = urllib.request.urlopen('http://www.unica.fi/fi/ravintolat/'+paikka).read().decode()
     soppa = BeautifulSoup(unica, 'html5lib')
     menuitems = soppa.find_all('div', {'class':'accord'})
-    daystrings = []
-    for idx, menuitem in enumerate(menuitems):
-        daystring = days[idx]+': '
+    daystrings = dict((idx, val+':') for idx, val in enumerate(days))
+    for menuitem in menuitems:
+        day = int(menuitem.find('h4')['data-dayofweek'])
+        daystring = days[day]+': '
         for lunch in menuitem.find_all('tr'):
             try:
                 daystring += '| '
@@ -42,7 +43,6 @@ def lounas(paikka, arguments):
                 daystring += lunch.find("td", {"class":"lunch"}).contents[0]+' |'
             except:
                 pass
-        daystrings.append(daystring)
-    while len(daystrings) < len(days):
-        daystrings.append(days[len(daystrings)]+': ')
-    return daystrings[paiva]
+        daystrings[day] = daystring
+
+    return daystrings.get(paiva)
