@@ -46,6 +46,9 @@ class MUCBot(sleekxmpp.ClientXMPP):
         def send_all(text):
             self.send_message(mto=msg['from'].bare, mbody=text, mtype='groupchat')
 
+        def send_back(text):
+            self.send_message(mto=msg['from'], mbody=text, mtype='chat')
+
         if len(msg_args) != 0 and msg['mucnick'] != self.nick:
             time = datetime.datetime.now().strftime('%Y/%m/%d %H:%M:%S ')
             open('chatlog.log', 'a').write(time+str(msg['from'])+'/'+msg['id']+': '+msg['body'].replace('\n', '')+'\n')
@@ -76,7 +79,7 @@ class MUCBot(sleekxmpp.ClientXMPP):
             if msg_args[0] == '!sää':
                 send_all(modules.turkuweather.weather(msg_args[1:]))
             if msg_args[0] == '!bus':
-                send_all(modules.bus.aikataulu(msg_args[1:], str(msg['mucnick'])))
+                send_back(modules.bus.aikataulu(msg_args[1:], str(msg['mucnick'])))
             if msg_args[0] == '!wc':
                 send_all(modules.wc.count(msg))
             if msg_args[0] == '!pasi':
