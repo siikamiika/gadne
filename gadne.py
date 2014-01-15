@@ -43,19 +43,20 @@ class MUCBot(sleekxmpp.ClientXMPP):
     def muc_message(self, msg):
 
         msg_args = msg['body'].split()
+        def send_all(text):
+            self.send_message(mto=msg['from'].bare, mbody=text, mtype='groupchat')
 
         if len(msg_args) != 0 and msg['mucnick'] != self.nick:
             time = datetime.datetime.now().strftime('%Y/%m/%d %H:%M:%S ')
             open('chatlog.log', 'a').write(time+str(msg['from'])+'/'+msg['id']+': '+msg['body'].replace('\n', '')+'\n')
-            viesti = ''
             if msg_args[0] == '!btc':
-                viesti = modules.katse.katse('btc')
+                send_all(modules.katse.katse('btc'))
             if msg_args[0] == '!ltc':
-                viesti = modules.katse.katse('ltc')
+                send_all(modules.katse.katse('ltc'))
             if msg_args[0] == '!xpm':
-                viesti = modules.katse.katse('xpm')
+                send_all(modules.katse.katse('xpm'))
             if msg_args[0] == '!ict':
-                viesti = modules.sodexo.lounas(msg_args[1:])
+                send_all(modules.sodexo.lounas(msg_args[1:]))
             unica = {
                 '!assari': 'assarin-ullakko/',
                 '!tottis': 'tottisalmi/',
@@ -69,53 +70,51 @@ class MUCBot(sleekxmpp.ClientXMPP):
                 '!rk': 'ruokakello/'
             }
             if msg_args[0] in unica:
-                viesti = modules.unica.lounas(unica[msg_args[0]], msg_args[1:])
+                send_all(modules.unica.lounas(unica[msg_args[0]], msg_args[1:]))
             if msg_args[0] == '!unica':
-                viesti = str(unica)
+                send_all(str(unica))
             if msg_args[0] == '!sää':
-                viesti = modules.turkuweather.weather(msg_args[1:])
+                send_all(modules.turkuweather.weather(msg_args[1:]))
             if msg_args[0] == '!bus':
-                self.send_message(mto=msg['from'], mbody=modules.bus.aikataulu(msg_args[1:], str(msg['mucnick'])), mtype='chat')
+                send_all(modules.bus.aikataulu(msg_args[1:], str(msg['mucnick'])))
             if msg_args[0] == '!wc':
-                self.send_message(mto=msg['from'].bare, mbody=modules.wc.count(msg), mtype='groupchat')
+                send_all(modules.wc.count(msg))
             if msg_args[0] == '!pasi':
-                viesti = '!perjantai'
+                send_all('!perjantai')
             if msg['body'] == 'Kyllä, nyt on perjantai' and str(msg['mucnick']) == 'Doodlebot':
-                self.send_message(mto=msg['from'].bare, mbody=modules.pasi.radio(), mtype='groupchat')
+                send_all(modules.pasi.radio())
             if msg_args[0] == 'gadne:':
                 kysymys = msg['body'].lstrip('gadne: ')
                 vastaus = modules.cleverbot.Cleverbot().ask(kysymys)
-                self.send_message(mto=msg['from'].bare, mbody=vastaus, mtype='groupchat')
+                send_all(vastaus)
             if 'nonyt' in ''.join(msg['body'].lower().split()):
-                self.send_message(mto=msg['from'].bare, mbody='NO NYT :ghammer:', mtype='groupchat')
+                send_all('NO NYT :ghammer:')
 
             for a in msg_args:
                 if a is not None:
                     ytinfo = modules.youtube.info(a)
                     if ytinfo != '':
-                        self.send_message(mto=msg['from'].bare, mbody=ytinfo, mtype='groupchat')
+                        send_all(ytinfo)
                     else:
-                        self.send_message(mto=msg['from'].bare, mbody=modules.title.get(a), mtype='groupchat')
+                        send_all(modules.title.get(a))
                 if re.match('https?://.*?\.(gif|png|jpe?g).*', a):
-                    self.send_message(mto=msg['from'].bare, mbody=modules.revimg.desc(a), mtype='groupchat')
+                    send_all(modules.revimg.desc(a))
                 if a.lower().startswith('gnu') or a == ':gnu:':
-                    viesti = 'hehe gnu gnu'
+                    send_all('hehe gnu gnu')
                 if a.lower().startswith('mad') or a == ':mad:':
-                    viesti = ':kasetti:'
+                    send_all(':kasetti:')
                 if not re.findall('[a-z]|:', msg['body']) and len(re.findall('[A-Z]', msg['body'])) >= 3:
-                    viesti = ':kasetti:'
+                    send_all(':kasetti:')
                     break
                 if a.startswith('läski'):
-                    viesti = ':laihduta:'
+                    send_all(':laihduta:')
                 if a.lower().startswith('feel') or a.lower().startswith('tajuu'):
-                    viesti = 'Yea, feel me. The beat is all in me.'
+                    send_all('Yea, feel me. The beat is all in me.')
                 # [20:11:58] <johan> NYT VITTUUN TOI
                 # [20:15:59] <edgar> vittu mä repeen tääl :D:D:D
                 # [20:19:16] <edgar> kiitos johanille päivän nauruist :D
                 #if a.lower().startswith('win'):
                 #   viesti = 'Juuh elikkäs joku Windows :grage:'
-            if viesti != '':
-                self.send_message(mto=msg['from'].bare, mbody=viesti, mtype='groupchat')
                 
 
 if __name__ == '__main__':
