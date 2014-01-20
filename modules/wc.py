@@ -12,12 +12,7 @@ def count(msg):
                 chatlog = chatlog.read().decode()
     except IOError:
         return 'ei voi lukea chatlogia'
-    rivit = chatlog.split('\n')
-    rivit = [ rivi for rivi in rivit if not '!wc' in rivi ]
-    chatlog = '\n'.join(rivit)
-    nimet = re.findall('(?:'+msg['from'].bare+'/)(.*?)(?:/.*?:\s)(?:.*?)(?:'+re.escape(viesti)+')', chatlog)
+    rivit = [rivi for rivi in chatlog.split('\n') if not '!wc' in rivi]
+    nimet = re.findall('(?:'+msg['from'].bare+'/)(.*?)(?:/.*?:\s)(?:.*?)(?:'+re.escape(viesti)+')', '\n'.join(rivit))
     wc = Counter(nimet)
-    ret = ''
-    for nimi, kerrat in wc.items():
-        ret += nimi+': '+str(kerrat)+' '
-    return ret
+    return ', '.join([tup[0]+': '+str(tup[1]) for tup in wc.most_common()])
