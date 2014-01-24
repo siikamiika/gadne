@@ -10,6 +10,7 @@ def get(url):
         title = re.search(b'<title.*?>(.*?)</title>', page, re.S | re.I).group(1)
         title = title.decode().strip()
         title = html.parser.HTMLParser().unescape(title)
+        title = re.sub('\s+', ' ', title)
         return title
     except:
         return ''
