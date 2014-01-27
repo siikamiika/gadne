@@ -18,6 +18,7 @@ import modules.pasi
 import modules.revimg
 import modules.title
 import modules.katse
+import modules.log
 
 class MUCBot(sleekxmpp.ClientXMPP):
 
@@ -82,6 +83,8 @@ class MUCBot(sleekxmpp.ClientXMPP):
                 send_back(modules.bus.aikataulu(msg_args[1:], str(msg['mucnick'])))
             if msg_args[0] == '!wc':
                 send_all(modules.wc.count(msg))
+            if msg_args[0] == '!find':
+                send_all(modules.log.find(msg))
             if msg_args[0] == '!pasi':
                 send_all('!perjantai')
             if msg['body'] == 'Kyllä, nyt on perjantai' and str(msg['mucnick']) == 'Doodlebot':
