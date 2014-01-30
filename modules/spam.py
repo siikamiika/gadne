@@ -1,14 +1,16 @@
 import random
 
 def spam():
-    ruokalista = ['Egg', 'Bacon', 'Sausage', 'Spam', 'Spam']
+    ruokalista = ['Egg', 'Bacon', 'Sausage']
+    random.shuffle(ruokalista)
     tilaus = []
-    tmp = None
 
-    for _ in range(random.randint(5, 10)):
-        ruoka = random.choice(ruokalista)
-        if ruoka is 'Spam' or ruoka is not tmp:
-            tilaus.append(ruoka)
-            tmp = ruoka
-
+    for _ in range(random.randint(1, 7)):
+        valinta = random.randrange(2)
+        if valinta and len(ruokalista):
+            ruoka = ruokalista.pop()
+        else:
+            ruoka = 'Spam'
+        tilaus.append(ruoka)
+        
     return ', '.join(tilaus)+' and Spam'
