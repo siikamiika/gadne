@@ -17,8 +17,8 @@ def get(url):
     if encoding is None:
         charset = (
             #yolo
-            re.search(b'<meta.*?charset=\"(.*?)\"', page, re.S | re.I) or
-            re.search(b'<meta.*?content=.*?charset=(.*?)[\";]', page, re.S | re.I)
+            re.search(b'<meta\s+charset=\"(.*?)\"', page, re.S | re.I) or
+            re.search(b'<meta\s+http-equiv=\"content-type\"\s+content=\".*?; charset=(.*?)[\";]', page, re.S | re.I)
         )
         if charset is None:
             encoding = 'utf-8'
