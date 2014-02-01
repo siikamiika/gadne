@@ -108,17 +108,23 @@ class MUCBot(sleekxmpp.ClientXMPP):
                         send_all(modules.title.get(a))
                 if re.match('https?://.*?\.(gif|png|jpe?g).*', a):
                     send_all(modules.revimg.desc(a))
+
+            for a in msg_args:
+                if not re.findall('[a-z]|:', msg['body']) and len(re.findall('[A-Z]', msg['body'])) >= 3:
+                    send_all(':kasetti:')
+                    break
                 if a.lower().startswith('gnu') or a == ':gnu:':
                     send_all('hehe gnu gnu')
+                    break
                 if a.lower().startswith('mad') or a == ':mad:':
-                    send_all(':kasetti:')
-                if not re.findall('[a-z]|:', msg['body']) and len(re.findall('[A-Z]', msg['body'])) >= 3:
                     send_all(':kasetti:')
                     break
                 if a.startswith('läski'):
                     send_all(':laihduta:')
+                    break
                 if a.lower().startswith('feel') or a.lower().startswith('tajuu'):
                     send_all('Yea, feel me. The beat is all in me.')
+                    break
                 # [20:11:58] <johan> NYT VITTUUN TOI
                 # [20:15:59] <edgar> vittu mä repeen tääl :D:D:D
                 # [20:19:16] <edgar> kiitos johanille päivän nauruist :D
