@@ -5,27 +5,24 @@ from bs4 import BeautifulSoup
 import html5lib
 import re
 
-def lounas(paikka, arguments):
+def lounas(msg):
 
     days = ['ma', 'ti', 'ke', 'to', 'pe', 'la', 'su']
     date = datetime.datetime.now()
     koko = False
 
     try:
-        delta = int(arguments[0])
+        delta = int(msg[1])
         date += datetime.timedelta(days=delta)
         paiva = date.weekday()
     except:
-        if len(arguments) != 0:
-            if arguments[0] in days:
-                paiva = days.index(arguments[0])
-            if arguments[0] == 'koko':
-                koko = True
-                paiva = date.weekday()
+        if len(msg) > 1:
+            if msg[1] in days:
+                paiva = days.index(msg[1])
         else:
             paiva = date.weekday()
     
-    unica = urllib.request.urlopen('http://www.unica.fi/fi/ravintolat/'+paikka).read().decode()
+    unica = urllib.request.urlopen('http://www.unica.fi/fi/ravintolat/'+msg[0]).read().decode()
     soppa = BeautifulSoup(unica, 'html5lib')
     menuitems = soppa.find_all('div', {'class':'accord'})
     daystrings = dict((idx, val+':') for idx, val in enumerate(days))

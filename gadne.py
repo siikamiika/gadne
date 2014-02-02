@@ -5,6 +5,7 @@ import os
 import datetime
 import re
 from optparse import OptionParser
+from concurrent.futures import ThreadPoolExecutor
 
 import sleekxmpp
 import modules.unica
@@ -20,6 +21,8 @@ import modules.spam
 import modules.link
 
 class MUCBot(sleekxmpp.ClientXMPP):
+
+    tp = ThreadPoolExecutor(max_workers=5)
 
     def __init__(self, jid, password, room, nick):
 
@@ -43,23 +46,25 @@ class MUCBot(sleekxmpp.ClientXMPP):
     def muc_message(self, msg):
 
         msg_args = msg['body'].split()
-        def send_all(text):
+
+        def send(text):
             self.send_message(mto=msg['from'].bare, mbody=text, mtype='groupchat')
 
         def send_back(text):
             self.send_message(mto=msg['from'], mbody=text, mtype='chat')
 
+
         if len(msg_args) != 0 and msg['mucnick'] != self.nick:
             time = datetime.datetime.now().strftime('%Y/%m/%d %H:%M:%S ')
             open('chatlog.log', 'a').write(time+str(msg['from'])+'/'+msg['id']+': '+msg['body'].replace('\n', '')+'\n')
             if msg_args[0] == '!btc':
-                send_all(modules.katse.katse('btc'))
+                self.tp.submit(lambda txt: send(modules.katse.katse(txt)), 'btc')
             if msg_args[0] == '!ltc':
-                send_all(modules.katse.katse('ltc'))
+                self.tp.submit(lambda txt: send(modules.katse.katse(txt)), 'ltc')
             if msg_args[0] == '!xpm':
-                send_all(modules.katse.katse('xpm'))
+                self.tp.submit(lambda txt: send(modules.katse.katse(txt)), 'xpm')
             if msg_args[0] == '!ict':
-                send_all(modules.sodexo.lounas(msg_args[1:]))
+                self.tp.submit(lambda txt: send(modules.sodexo.lounas(txt)), msg_args[1:])
             unica = {
                 '!assari': 'assarin-ullakko/',
                 '!tottis': 'tottisalmi/',
@@ -73,49 +78,49 @@ class MUCBot(sleekxmpp.ClientXMPP):
                 '!rk': 'ruokakello/'
             }
             if msg_args[0] in unica:
-                send_all(modules.unica.lounas(unica[msg_args[0]], msg_args[1:]))
+                msg_args[0] = unica[msg_args[0]]
+                self.tp.submit(lambda txt: send(modules.unica.lounas(txt)), msg_args)
             if msg_args[0] == '!unica':
-                send_all(str(unica))
+                self.tp.submit(lambda txt: send(txt), str(unica))
             if msg_args[0] == '!sää':
-                send_all(modules.turkuweather.weather(msg_args[1:]))
+                self.tp.submit(lambda txt: send(modules.turkuweather.weather(txt)), msg_args[1:])
             if msg_args[0] == '!bus':
-                send_back(modules.bus.aikataulu(msg_args[1:], str(msg['mucnick'])))
+                self.tp.submit(lambda txt: send_back(modules.bus.aikataulu(txt)), msg)
             if msg_args[0] == '!wc':
-                send_all(modules.wc.count(msg))
+                self.tp.submit(lambda txt: send(modules.wc.count(txt)), msg)
             if msg_args[0] == '!spam':
-                send_all(modules.spam.spam())
+                self.tp.submit(lambda txt: send(modules.spam.spam()))
             if msg_args[0] == '!find':
-                send_all(modules.log.find(msg))
+                self.tp.submit(lambda txt: send(modules.log.find(txt)), msg)
             if msg_args[0] == '!pasi':
-                send_all('!perjantai')
+                self.tp.submit(lambda txt: send(txt), '!perjantai')
             if msg['body'] == 'Kyllä, nyt on perjantai' and str(msg['mucnick']) == 'Doodlebot':
-                send_all(modules.pasi.radio())
+                self.tp.submit(lambda txt: send(modules.pasi.radio()))
             if msg_args[0] == 'gadne:':
                 kysymys = msg['body'].lstrip('gadne: ')
-                vastaus = modules.cleverbot.Cleverbot().ask(kysymys)
-                send_all(vastaus)
+                self.tp.submit(lambda txt: send(modules.cleverbot.Cleverbot().ask(txt)), kysymys)
             if 'nonyt' in ''.join(msg['body'].lower().split()):
-                send_all('NO NYT :ghammer:')
+                self.tp.submit(lambda txt: send(txt), 'NO NYT :ghammer:')
 
             for maybe_url in msg_args:
                 # youtube info, title, reverse image search
-                send_all(modules.link.desc(maybe_url))
+                self.tp.submit(lambda txt: send(modules.link.desc(txt)), maybe_url)
 
             for a in msg_args:
                 if not re.findall('[a-z]|:', msg['body']) and len(re.findall('[A-Z]', msg['body'])) >= 3:
-                    send_all(':kasetti:')
+                    self.tp.submit(lambda txt: send(txt), ':kasetti:')
                     break
                 if a.lower().startswith('gnu') or a == ':gnu:':
-                    send_all('hehe gnu gnu')
+                    self.tp.submit(lambda txt: send(txt), 'hehe gnu gnu')
                     break
                 if a.lower().startswith('mad') or a == ':mad:':
-                    send_all(':kasetti:')
+                    self.tp.submit(lambda txt: send(txt), ':kasetti:')
                     break
                 if a.startswith('läski'):
-                    send_all(':laihduta:')
+                    self.tp.submit(lambda txt: send(txt), ':laihduta:')
                     break
                 if a.lower().startswith('feel') or a.lower().startswith('tajuu'):
-                    send_all('Yea, feel me. The beat is all in me.')
+                    self.tp.submit(lambda txt: send(txt), 'Yea, feel me. The beat is all in me.')
                     break
                 # [20:11:58] <johan> NYT VITTUUN TOI
                 # [20:15:59] <edgar> vittu mä repeen tääl :D:D:D

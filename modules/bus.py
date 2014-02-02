@@ -1,7 +1,9 @@
 import urllib.request
 from bs4 import BeautifulSoup
 
-def aikataulu(arguments, msgfrom):
+def aikataulu(msg):
+    arguments = msg['body'].split()[1:]
+    msgfrom = msg['mucnick']
     try:
         num = str(int(arguments[0]))
     except ValueError:

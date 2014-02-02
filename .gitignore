@@ -6,3 +6,4 @@ sleekxmpp/
 *.log
 *.sh
 *.html
+*.bus
