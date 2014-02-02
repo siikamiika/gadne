@@ -89,7 +89,7 @@ class MUCBot(sleekxmpp.ClientXMPP):
             if msg_args[0] == '!wc':
                 self.tp.submit(lambda txt: send(modules.wc.count(txt)), msg)
             if msg_args[0] == '!spam':
-                self.tp.submit(lambda txt: send(modules.spam.spam()))
+                self.tp.submit(lambda txt: send(modules.spam.spam(txt)), 'juuh elikkäs') # lambda vaatii
             if msg_args[0] == '!find':
                 self.tp.submit(lambda txt: send(modules.log.find(txt)), msg)
             if msg_args[0] == '!pasi':
