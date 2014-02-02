@@ -10,16 +10,14 @@ import sleekxmpp
 import modules.unica
 import modules.sodexo
 import modules.turkuweather
-import modules.youtube
 import modules.bus
 import modules.cleverbot
 import modules.wc
 import modules.pasi
-import modules.revimg
-import modules.title
 import modules.katse
 import modules.log
 import modules.spam
+import modules.link
 
 class MUCBot(sleekxmpp.ClientXMPP):
 
@@ -99,15 +97,9 @@ class MUCBot(sleekxmpp.ClientXMPP):
             if 'nonyt' in ''.join(msg['body'].lower().split()):
                 send_all('NO NYT :ghammer:')
 
-            for a in msg_args:
-                if a is not None:
-                    ytinfo = modules.youtube.info(a)
-                    if ytinfo != '':
-                        send_all(ytinfo)
-                    else:
-                        send_all(modules.title.get(a))
-                if re.match('https?://.*?\.(gif|png|jpe?g).*', a):
-                    send_all(modules.revimg.desc(a))
+            for maybe_url in msg_args:
+                # youtube info, title, reverse image search
+                send_all(modules.link.desc(maybe_url))
 
             for a in msg_args:
                 if not re.findall('[a-z]|:', msg['body']) and len(re.findall('[A-Z]', msg['body'])) >= 3:
