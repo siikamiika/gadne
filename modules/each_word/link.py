@@ -5,7 +5,7 @@ import html.parser
 import json
 import datetime
 
-def desc(url):
+def run(url):
     """Return info about an url. Statistics for YouTube videos, 
     Google reverse image description for images 
     and page title for anything else."""

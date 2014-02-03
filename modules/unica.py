@@ -5,24 +5,40 @@ from bs4 import BeautifulSoup
 import html5lib
 import re
 
-def lounas(msg):
+triggers = {
+    '!assari': 'assarin-ullakko/',
+    '!tottis': 'tottisalmi/',
+    '!delica': 'delica/',
+    '!brygge': 'brygge/',
+    '!deli': 'deli-pharma/',
+    '!dent': 'dental/',
+    '!mac': 'macciavelli/',
+    '!mikro': 'mikro/',
+    '!nutri': 'nutritio/',
+    '!rk': 'ruokakello/'
+}
+
+def run(msg):
+
+    msg_args = msg['body'].split()
+    paikka = triggers[msg_args[0]]
 
     days = ['ma', 'ti', 'ke', 'to', 'pe', 'la', 'su']
     date = datetime.datetime.now()
     koko = False
 
     try:
-        delta = int(msg[1])
+        delta = int(msg_args[1])
         date += datetime.timedelta(days=delta)
         paiva = date.weekday()
     except:
-        if len(msg) > 1:
-            if msg[1] in days:
-                paiva = days.index(msg[1])
+        if len(msg_args) > 1:
+            if msg_args[1] in days:
+                paiva = days.index(msg_args[1])
         else:
             paiva = date.weekday()
     
-    unica = urllib.request.urlopen('http://www.unica.fi/fi/ravintolat/'+msg[0]).read().decode()
+    unica = urllib.request.urlopen('http://www.unica.fi/fi/ravintolat/'+paikka).read().decode()
     soppa = BeautifulSoup(unica, 'html5lib')
     menuitems = soppa.find_all('div', {'class':'accord'})
     daystrings = dict((idx, val+':') for idx, val in enumerate(days))

@@ -1,4 +1,6 @@
-def find(msg):
+triggers = ['!find']
+
+def run(msg):
     msg = msg['body'][6:]
     with open('chatlog.log', 'r') as chatlog:
         chatlog = chatlog.read()

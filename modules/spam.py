@@ -1,6 +1,8 @@
 import random
 
-def spam(lol):
+triggers = ['!spam']
+
+def run(lol):
     ruokalista = ['Egg', 'Bacon', 'Sausage']
     random.shuffle(ruokalista)
     tilaus = []

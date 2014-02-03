@@ -8,18 +8,39 @@ from optparse import OptionParser
 from concurrent.futures import ThreadPoolExecutor
 
 import sleekxmpp
-import modules.unica
-import modules.sodexo
-import modules.turkuweather
-import modules.bus
-import modules.cleverbot
-import modules.wc
-import modules.pasi
-import modules.katse
-import modules.log
-import modules.spam
-import modules.link
-import modules.uptime
+
+modules = [
+    f[:-3] for f in os.listdir('modules')
+    if os.path.isfile('modules/'+f) and f != '__init__.py' and f[-3:] == '.py'
+]
+
+each_msg = [
+    f[:-3] for f in os.listdir('modules/each_msg')
+    if os.path.isfile('modules/each_msg/'+f) and f != '__init__.py' and f[-3:] == '.py'
+]
+
+each_word = [
+    f[:-3] for f in os.listdir('modules/each_word')
+    if os.path.isfile('modules/each_word/'+f) and f != '__init__.py' and f[-3:] == '.py'
+]
+
+module_triggers = dict()
+eachmsg_modulelist = []
+eachword_modulelist = []
+
+
+for module in modules:
+    exec('import modules.'+module)
+    exec('from modules.'+module+' import triggers as '+module+'_triggers')
+    exec('for t in '+module+'_triggers: module_triggers[t] = modules.'+module)
+
+for module in each_msg:
+    exec('import modules.each_msg.'+module)
+    exec('eachmsg_modulelist.append(modules.each_msg.'+module+')')
+
+for module in each_word:
+    exec('import modules.each_word.'+module)
+    exec('eachword_modulelist.append(modules.each_word.'+module+')')
 
 class MUCBot(sleekxmpp.ClientXMPP):
 
@@ -58,78 +79,16 @@ class MUCBot(sleekxmpp.ClientXMPP):
         if len(msg_args) != 0 and msg['mucnick'] != self.nick:
             time = datetime.datetime.now().strftime('%Y/%m/%d %H:%M:%S ')
             open('chatlog.log', 'a').write(time+str(msg['from'])+'/'+msg['id']+': '+msg['body'].replace('\n', '')+'\n')
-            if msg_args[0] == '!btc':
-                self.tp.submit(lambda txt: send(modules.katse.katse(txt)), 'btc')
-            if msg_args[0] == '!ltc':
-                self.tp.submit(lambda txt: send(modules.katse.katse(txt)), 'ltc')
-            if msg_args[0] == '!xpm':
-                self.tp.submit(lambda txt: send(modules.katse.katse(txt)), 'xpm')
-            if msg_args[0] == '!ict':
-                self.tp.submit(lambda txt: send(modules.sodexo.lounas(txt)), msg_args[1:])
-            unica = {
-                '!assari': 'assarin-ullakko/',
-                '!tottis': 'tottisalmi/',
-                '!delica': 'delica/',
-                '!brygge': 'brygge/',
-                '!deli': 'deli-pharma/',
-                '!dent': 'dental/',
-                '!mac': 'macciavelli/',
-                '!mikro': 'mikro/',
-                '!nutri': 'nutritio/',
-                '!rk': 'ruokakello/'
-            }
-            if msg_args[0] in unica:
-                msg_args[0] = unica[msg_args[0]]
-                self.tp.submit(lambda txt: send(modules.unica.lounas(txt)), msg_args)
-            if msg_args[0] == '!unica':
-                self.tp.submit(lambda txt: send(txt), str(unica))
-            if msg_args[0] == '!sää':
-                self.tp.submit(lambda txt: send(modules.turkuweather.weather(txt)), msg_args[1:])
-            if msg_args[0] == '!bus':
-                self.tp.submit(lambda txt: send_back(modules.bus.aikataulu(txt)), msg)
-            if msg_args[0] == '!wc':
-                self.tp.submit(lambda txt: send(modules.wc.count(txt)), msg)
-            if msg_args[0] == '!spam':
-                self.tp.submit(lambda txt: send(modules.spam.spam(txt)), '')
-            if msg_args[0] == '!uptime':
-                self.tp.submit(lambda txt: send(modules.uptime.get(txt)), '')
-            if msg_args[0] == '!find':
-                self.tp.submit(lambda txt: send(modules.log.find(txt)), msg)
-            if msg_args[0] == '!pasi':
-                self.tp.submit(lambda txt: send(txt), '!perjantai')
-            if msg['body'] == 'Kyllä, nyt on perjantai' and str(msg['mucnick']) == 'Doodlebot':
-                self.tp.submit(lambda txt: send(modules.pasi.radio()))
-            if msg_args[0] == 'gadne:':
-                kysymys = msg['body'].lstrip('gadne: ')
-                self.tp.submit(lambda txt: send(modules.cleverbot.Cleverbot().ask(txt)), kysymys)
-            if 'nonyt' in ''.join(msg['body'].lower().split()):
-                self.tp.submit(lambda txt: send(txt), 'NO NYT :ghammer:')
 
-            for maybe_url in msg_args:
-                # youtube info, title, reverse image search
-                self.tp.submit(lambda txt: send(modules.link.desc(txt)), maybe_url)
+            for m in eachmsg_modulelist:
+                self.tp.submit(lambda msg=msg: send(m.run(msg)))
 
-            for a in msg_args:
-                if not re.findall('[a-z]|:', msg['body']) and len(re.findall('[A-Z]', msg['body'])) >= 3:
-                    self.tp.submit(lambda txt: send(txt), ':kasetti:')
-                    break
-                if a.lower().startswith('gnu') or a == ':gnu:':
-                    self.tp.submit(lambda txt: send(txt), 'hehe gnu gnu')
-                    break
-                if a.lower().startswith('mad') or a == ':mad:':
-                    self.tp.submit(lambda txt: send(txt), ':kasetti:')
-                    break
-                if a.startswith('läski'):
-                    self.tp.submit(lambda txt: send(txt), ':laihduta:')
-                    break
-                if a.lower().startswith('feel') or a.lower().startswith('tajuu'):
-                    self.tp.submit(lambda txt: send(txt), 'Yea, feel me. The beat is all in me.')
-                    break
-                # [20:11:58] <johan> NYT VITTUUN TOI
-                # [20:15:59] <edgar> vittu mä repeen tääl :D:D:D
-                # [20:19:16] <edgar> kiitos johanille päivän nauruist :D
-                #if a.lower().startswith('win'):
-                #   viesti = 'Juuh elikkäs joku Windows :grage:'
+            if msg_args[0] in module_triggers:
+                self.tp.submit(lambda msg=msg: send(module_triggers[msg_args[0]].run(msg)))
+
+            for w in eachword_modulelist:
+                for arg in msg_args:
+                    self.tp.submit(lambda arg=arg: send(w.run(arg)))
                 
 
 if __name__ == '__main__':

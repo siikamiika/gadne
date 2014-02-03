@@ -3,6 +3,7 @@ import pprint
 import urllib.request, urllib.parse, urllib.error, urllib.request, urllib.error, urllib.parse
 import html.parser
 
+triggers = ['gadne:']
 
 class Cleverbot:
 
@@ -148,3 +149,7 @@ class Cleverbot:
 
         if self.DEBUG:
             print(args)
+
+def run(msg):
+    msg = msg['body'].lstrip('gadne: ')
+    return Cleverbot().ask(msg)

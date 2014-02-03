@@ -1,7 +1,9 @@
 import re
 from collections import Counter
 
-def count(msg):
+triggers = ['!wc']
+
+def run(msg):
     viesti = msg['body'][4:]
     try:
         try:

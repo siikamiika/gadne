@@ -1,6 +1,10 @@
 import urllib.request,datetime,json,sys
 
-def lounas(arguments):
+triggers = ['!ict']
+
+def run(msg):
+
+    arguments = msg['body'].split()[1:]
 
     days = ['ma', 'ti', 'ke', 'to', 'pe', 'la', 'su']
     date = datetime.datetime.now()

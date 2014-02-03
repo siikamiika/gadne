@@ -1,7 +1,9 @@
 import urllib.request
 from bs4 import BeautifulSoup
 
-def aikataulu(msg):
+triggers = ['!bus']
+
+def run(msg):
     arguments = msg['body'].split()[1:]
     msgfrom = msg['mucnick']
     try:

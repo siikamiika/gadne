@@ -1,6 +1,8 @@
 import datetime
 
-def get(asd):
+triggers = ['!uptime']
+
+def run(msg):
     try:
         uptime = open('/proc/uptime', 'r').read()
         uptime = float(uptime.split()[0])
