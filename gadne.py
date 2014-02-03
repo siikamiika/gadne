@@ -19,6 +19,7 @@ import modules.katse
 import modules.log
 import modules.spam
 import modules.link
+import modules.uptime
 
 class MUCBot(sleekxmpp.ClientXMPP):
 
@@ -89,7 +90,9 @@ class MUCBot(sleekxmpp.ClientXMPP):
             if msg_args[0] == '!wc':
                 self.tp.submit(lambda txt: send(modules.wc.count(txt)), msg)
             if msg_args[0] == '!spam':
-                self.tp.submit(lambda txt: send(modules.spam.spam(txt)), 'juuh elikkäs') # lambda vaatii
+                self.tp.submit(lambda txt: send(modules.spam.spam(txt)), '')
+            if msg_args[0] == '!uptime':
+                self.tp.submit(lambda txt: send(modules.uptime.get(txt)), '')
             if msg_args[0] == '!find':
                 self.tp.submit(lambda txt: send(modules.log.find(txt)), msg)
             if msg_args[0] == '!pasi':
