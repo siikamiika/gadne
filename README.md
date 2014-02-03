@@ -9,3 +9,5 @@ How to run:
     pip install beautifulsoup4
 
     python3 gadne.py
+
+![octogadne](https://raw.github.com/siikamiika/gadne/master/octogadne.png)
