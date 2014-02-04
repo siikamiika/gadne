@@ -38,7 +38,9 @@ def run(msg):
         else:
             paiva = date.weekday()
     
-    unica = urllib.request.urlopen('http://www.unica.fi/fi/ravintolat/'+paikka).read().decode()
+    unica = urllib.request.urlopen(
+           'http://www.unica.fi/fi/ravintolat/'+paikka
+        ).read().decode()
     soppa = BeautifulSoup(unica, 'html5lib')
     menuitems = soppa.find_all('div', {'class':'accord'})
     daystrings = dict((idx, val+':') for idx, val in enumerate(days))
@@ -48,14 +50,17 @@ def run(msg):
         for lunch in menuitem.find_all('tr'):
             try:
                 daystring += '| '
-                hinta = lunch.find("td", {"class":"price quiet"}).contents[0].split("Hinta:")[1].split("/")[0].strip()
-                daystring += re.sub('\n|\t', '', hinta)+' '
+                daystring += lunch.find(
+                        'td', {'class':'price quiet'}
+                    ).contents[0].split('Hinta:')[1].split('/')[0].strip()+' '
             except:
                 pass
             try:
-                daystring += lunch.find("td", {"class":"lunch"}).contents[0]+' |'
+                daystring += lunch.find(
+                        'td', {'class':'lunch'}
+                    ).contents[0]+' |'
             except:
                 pass
-        daystrings[day] = daystring
+        daystrings[day] = re.sub('\s+', ' ', daystring)
 
     return daystrings.get(paiva)

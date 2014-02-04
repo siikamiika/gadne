@@ -3,7 +3,7 @@ import urllib.request
 import urllib.parse
 import html.parser
 import json
-import datetime
+from datetime import timedelta
 
 def run(url):
     """Return info about an url. Statistics for YouTube videos, 
@@ -25,7 +25,7 @@ def run(url):
         content_type = response.headers['Content-Type'].lower()
         encoding = response.headers.get_content_charset()
         redir = response.geturl()
-        ytmatch = re.search('youtube\.com/(?:.*?v=|.*?embed/|.*?v/|/)(.{11})',
+        ytmatch = re.search('youtube\.com/.*?(?:[\?\&]v=|embed/|v/)(.{11})',
             redir)
     except Exception as e:
         if type(e) is not ValueError:
@@ -37,26 +37,23 @@ def run(url):
         try:
             videoid = ytmatch.group(1)
             jsondata = json.loads(urllib.request.urlopen(
-                'http://gdata.youtube.com/feeds/api/videos/'+videoid+
-                '?v=2&alt=jsonc').read().decode())
+                'http://gdata.youtube.com/feeds/api/videos/'
+                '{}?v=2&alt=jsonc'.format(videoid)).read().decode())
             video = jsondata['data']
-            kesto = ' ('+str(datetime.timedelta(seconds=video['duration']))+')'
+            kesto = timedelta(seconds=video['duration'])
             try:
-                likeratio = str(round(
-                        (int(video['likeCount'])/video['ratingCount'])*100, 2
-                    ))+'%'
+                likeratio = round(
+                        (int(video['likeCount'])/video['ratingCount'])*100,
+                    2)
             except KeyError:
-                likeratio = 'ei ole'
-            nippelitieto = ' / '.join([
-                    'Aihe: '+video['category'],
-                    '{:,}'.format(video['viewCount'])+' katselukertaa',
-                    'likeratio: '+likeratio
-                ])
-            ret = 'Youtube: '
-            ret += ('[' + video['uploader'] + '] ' + video['title'] + kesto +
-                ' | ' + nippelitieto)
+                likeratio = '0/0'
+
             print('YouTube:', videoid)
-            return ret
+            return ('Youtube: [{0}] {1} ({2}) | Aihe: {3} / '
+                '{4:,} katselukertaa / likeratio: {5}%').format(
+                    video['uploader'], video['title'], kesto,
+                    video['category'], video['viewCount'], likeratio
+                )
         except Exception as e:
             print(e)
             return
