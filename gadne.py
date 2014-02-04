@@ -5,42 +5,35 @@ import os
 import datetime
 import re
 from optparse import OptionParser
+import sleekxmpp
 from concurrent.futures import ThreadPoolExecutor
 
-import sleekxmpp
-
-modules = [
-    f[:-3] for f in os.listdir('modules')
-    if os.path.isfile('modules/'+f) and f != '__init__.py' and f[-3:] == '.py'
-]
-
-each_msg = [
-    f[:-3] for f in os.listdir('modules/each_msg')
-    if os.path.isfile('modules/each_msg/'+f) and f != '__init__.py' and f[-3:] == '.py'
-]
-
-each_word = [
-    f[:-3] for f in os.listdir('modules/each_word')
-    if os.path.isfile('modules/each_word/'+f) and f != '__init__.py' and f[-3:] == '.py'
-]
-
+# how to include triggers in a module:
+# triggers = ['!something', '!else']
+# also: triggers = {'!smt': 'something'}
 module_triggers = dict()
 eachmsg_modulelist = []
 eachword_modulelist = []
 
+moduledirs = dict(
+    (
+        folder.split(os.sep)[-1],
+        ['.'.join(os.path.join(folder, f[:-3]).split(os.sep))
+        for f in files if f[-3:] == '.py' and f != '__init__.py']
+    )
+    for folder, folders, files in os.walk('modules')
+    if '__pycache__' not in folder and 'unused' not in folder
+)
 
-for module in modules:
-    exec('import modules.'+module)
-    exec('from modules.'+module+' import triggers as '+module+'_triggers')
-    exec('for t in '+module+'_triggers: module_triggers[t] = modules.'+module)
-
-for module in each_msg:
-    exec('import modules.each_msg.'+module)
-    exec('eachmsg_modulelist.append(modules.each_msg.'+module+')')
-
-for module in each_word:
-    exec('import modules.each_word.'+module)
-    exec('eachword_modulelist.append(modules.each_word.'+module+')')
+for folder, mlist in moduledirs.items():
+    for module in mlist:
+        exec('import {}'.format(module))
+        if folder == 'modules':
+            exec('for t in {0}.triggers: module_triggers[t] = {0}'.format(module))
+        elif folder == 'each_msg':
+            exec('eachmsg_modulelist.append({})'.format(module))
+        elif folder == 'each_word':
+            exec('eachword_modulelist.append({})'.format(module))
 
 class MUCBot(sleekxmpp.ClientXMPP):
 
@@ -70,34 +63,57 @@ class MUCBot(sleekxmpp.ClientXMPP):
         msg_args = msg['body'].split()
 
         def send(text):
-            self.send_message(mto=msg['from'].bare, mbody=text, mtype='groupchat')
+            self.send_message(mto=msg['from'].bare, mbody=text,
+                mtype='groupchat')
 
-        def send_back(text):
-            self.send_message(mto=msg['from'], mbody=text, mtype='chat')
-
+        #def send_back(text):
+        #    self.send_message(mto=msg['from'], mbody=text, mtype='chat')
 
         if len(msg_args) != 0 and msg['mucnick'] != self.nick:
             time = datetime.datetime.now().strftime('%Y/%m/%d %H:%M:%S ')
-            open('chatlog.log', 'a').write(time+str(msg['from'])+'/'+msg['id']+': '+msg['body'].replace('\n', '')+'\n')
+            open('chatlog.log', 'a').write(
+                time+str(msg['from'])+'/'+msg['id']+': '+
+                msg['body'].replace('\n', '')+'\n'
+            )
 
             for m in eachmsg_modulelist:
                 self.tp.submit(lambda msg=msg: send(m.run(msg)))
 
             if msg_args[0] in module_triggers:
-                self.tp.submit(lambda msg=msg: send(module_triggers[msg_args[0]].run(msg)))
+                self.tp.submit(lambda msg=msg:
+                        send(module_triggers[msg_args[0]].run(msg))
+                    )
 
             for w in eachword_modulelist:
                 for arg in msg_args:
                     self.tp.submit(lambda arg=arg: send(w.run(arg)))
-                
+
 
 if __name__ == '__main__':
 
     optp = OptionParser()
 
-    optp.add_option('-q', '--quiet', help='set logging to ERROR', action='store_const', dest='loglevel', const=logging.ERROR, default=logging.INFO)
-    optp.add_option('-d', '--debug', help='set logging to DEBUG', action='store_const', dest='loglevel', const=logging.DEBUG, default=logging.INFO)
-    optp.add_option('-v', '--verbose', help='set logging to COMM', action='store_const', dest='loglevel', const=5, default=logging.INFO)
+    optp.add_option('-q', '--quiet',
+            help='set logging to ERROR',
+            action='store_const',
+            dest='loglevel',
+            const=logging.ERROR,
+            default=logging.INFO
+        )
+    optp.add_option('-d', '--debug',
+            help='set logging to DEBUG',
+            action='store_const',
+            dest='loglevel',
+            const=logging.DEBUG,
+            default=logging.INFO
+        )
+    optp.add_option('-v', '--verbose',
+            help='set logging to COMM',
+            action='store_const',
+            dest='loglevel',
+            const=5,
+            default=logging.INFO
+        )
 
     optp.add_option("-j", "--jid", dest="jid", help="JID to use")
     optp.add_option("-p", "--password", dest="password", help="password to use")
