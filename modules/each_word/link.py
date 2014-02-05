@@ -100,7 +100,7 @@ def run(url):
         with open('rt.html', 'wb') as f:
             f.write(rt)
         rt = BeautifulSoup(rt.decode('latin-1'), 'html5lib')
-        title = rt.title.text.rstrip(' - MuroBBS')
+        title = rt.title.text.strip()[:-len('- MuroBBS')]
         posts = rt.find_all('table', {'id': re.compile('post[0-9]*')})
         def post_details(post_n):
             return {
@@ -116,9 +116,8 @@ def run(url):
                     )) if hasattr(child, 'href') else child) or ''
                     for child in posts[post_n].find(
                         'div', {'id': 'post_message_'+posts[post_n].get('id')[4:]}
-                    ).children]))
+                    ).children]).strip())
             }
-        print(post_details(0))
         op = post_details(0)
         return '{0} {1} {2}\n{3}'.format(op['name'], op['time'], title, op['msg'])
 
