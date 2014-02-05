@@ -31,7 +31,7 @@ def run(url):
         redir = response.geturl()
         ytmatch = re.search('youtube\.com/.*?(?:[\?\&]v=|embed/|v/)(.{11})',
             redir)
-        rtmatch = re.search('^http://murobbs.plaza.fi/rapellys-ja-testaus/', redir)
+        rtmatch = re.search('^http://murobbs.plaza.fi/rapellys-ja-testaus/[0-9]+.*?\.html$', redir)
     except Exception as e:
         if type(e) is not ValueError:
             print(url, e)
@@ -56,7 +56,7 @@ def run(url):
                 'do': 'login'
             }).encode()
 
-        def get_info(cookies):
+        def get_page(cookies):
             rt_headers = dict(login_headers)
             rt_headers.pop('Origin')
             rt_headers['Cookie'] = cookies
@@ -84,23 +84,43 @@ def run(url):
         try:
             with open('modules/each_word/cookies.login', 'r') as c:
                 cookies = c.read()
-            rt = get_info(cookies)
+            rt = get_page(cookies)
             if b'Et ole kirjautunut' in rt:
-                rt = get_info(login())
+                rt = get_page(login())
             if b'Et ole kirjautunut' in rt:
                 return 'Ei voi kirjautua sisään'
         except Exception as e:
             if type(e) == FileNotFoundError:
-                rt = get_info(login())
+                rt = get_page(login())
                 if b'Et ole kirjautunut' in rt:
                     return 'Ei voi kirjautua sisään'
             else:
                 print(e)
                 return
-        rt = BeautifulSoup(rt.decode('latin-1'))
-        rttitle = rt.title.string.strip()
-        print(rttitle)
-        return rttitle
+        with open('rt.html', 'wb') as f:
+            f.write(rt)
+        rt = BeautifulSoup(rt.decode('latin-1'), 'html5lib')
+        title = rt.title.text.rstrip(' - MuroBBS')
+        posts = rt.find_all('table', {'id': re.compile('post[0-9]*')})
+        def post_details(post_n):
+            return {
+                'name': posts[post_n].find('a', {
+                    'class': 'bigusername'}).text,
+
+                'time': posts[post_n].find('a', {
+                    'name': posts[post_n].get('id')}).img.next.strip(),
+
+                'msg': re.sub('\s+', ' ', ' '.join([
+                    (urllib.parse.unquote((child.get('href') or '').replace(
+                        'http://murobbs.plaza.fi/redirect-to/?redirect=', ''
+                    )) if hasattr(child, 'href') else child) or ''
+                    for child in posts[post_n].find(
+                        'div', {'id': 'post_message_'+posts[post_n].get('id')[4:]}
+                    ).children]))
+            }
+        print(post_details(0))
+        op = post_details(0)
+        return '{0} {1} {2}\n{3}'.format(op['name'], op['time'], title, op['msg'])
 
     elif ytmatch:
         # youtube video info
