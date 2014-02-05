@@ -99,10 +99,53 @@ def run(url):
                 return
         with open('rt.html', 'wb') as f:
             f.write(rt)
-        rt = BeautifulSoup(rt.decode('latin-1'), 'html5lib')
-        title = rt.title.text.strip()[:-len('- MuroBBS')]
+        rt = BeautifulSoup(rt.decode('windows-1252'), 'html5lib')
+        title = rt.title.text.strip()[:-len(' - MuroBBS')]
         posts = rt.find_all('table', {'id': re.compile('post[0-9]*')})
         def post_details(post_n):
+            sm_path = 'modules/each_word/smilies.json'
+            try:
+                with open(sm_path, 'r') as s:
+                    smilies = json.loads(s.read())
+            except Exception as e:
+                if type(e) == OSError or IOError:
+                    with open(sm_path, 'w') as s:
+                        smilies = dict(
+                            (s.get('src'), s.get('alt')) for s in
+                            BeautifulSoup(
+                                urllib.request.urlopen(
+                                    'http://murobbs.plaza.fi/misc.php'
+                                    '?do=getsmilies').read().decode(
+                                    'windows-1252')
+                                )
+                            .find_all(
+                                    'img',{'id': re.compile('smilie_')}
+                                )
+                            )
+                        s.write(json.dumps(smilies))
+                else:
+                    return 'hymiöissä vikaa :mad:'
+
+            post_msg = []
+
+            for item in posts[post_n].find(
+                    'div', {'id': 'post_message_'+posts[post_n].get('id')[4:]}
+                ).children:
+                if item.name is 'a':
+                    post_msg.append(str(
+                        urllib.parse.unquote(item.get('href')).replace(
+                            'http://murobbs.plaza.fi/redirect-to/?redirect=', ''
+                        )))
+                if hasattr(item, 'get') and item.get('src'):
+                    src = item.get('src')
+                    smilie = src.replace('http://murobbs.plaza.fi/', '')
+                    if smilie in smilies:
+                        post_msg.append(smilies[smilie])
+                    else:
+                        post_msg.append('<{}>'.format(src))
+                if item.name is None:
+                    post_msg.append(str(item))
+
             return {
                 'name': posts[post_n].find('a', {
                     'class': 'bigusername'}).text,
@@ -110,13 +153,7 @@ def run(url):
                 'time': posts[post_n].find('a', {
                     'name': posts[post_n].get('id')}).img.next.strip(),
 
-                'msg': re.sub('\s+', ' ', ' '.join([
-                    (urllib.parse.unquote((child.get('href') or '').replace(
-                        'http://murobbs.plaza.fi/redirect-to/?redirect=', ''
-                    )) if hasattr(child, 'href') else child) or ''
-                    for child in posts[post_n].find(
-                        'div', {'id': 'post_message_'+posts[post_n].get('id')[4:]}
-                    ).children]).strip())
+                'msg': re.sub('\s+', ' ', ' '.join(post_msg).strip())
             }
         op = post_details(0)
         return '{0} {1} {2}\n{3}'.format(op['name'], op['time'], title, op['msg'])
