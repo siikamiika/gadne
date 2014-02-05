@@ -131,7 +131,7 @@ def run(url):
             for item in posts[post_n].find(
                     'div', {'id': 'post_message_'+posts[post_n].get('id')[4:]}
                 ).children:
-                if item.name is 'a':
+                if hasattr(item, 'get') and item.get('href'):
                     post_msg.append(str(
                         urllib.parse.unquote(item.get('href')).replace(
                             'http://murobbs.plaza.fi/redirect-to/?redirect=', ''
