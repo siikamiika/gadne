@@ -90,7 +90,7 @@ def run(url):
             if b'Et ole kirjautunut' in rt:
                 return 'Ei voi kirjautua sisään'
         except Exception as e:
-            if type(e) == FileNotFoundError:
+            if type(e) == OSError or IOError:
                 rt = get_page(login())
                 if b'Et ole kirjautunut' in rt:
                     return 'Ei voi kirjautua sisään'
