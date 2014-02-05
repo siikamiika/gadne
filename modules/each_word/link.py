@@ -31,16 +31,35 @@ def run(url):
         redir = response.geturl()
         ytmatch = re.search('youtube\.com/.*?(?:[\?\&]v=|embed/|v/)(.{11})',
             redir)
-        rtmatch = re.search('^http://murobbs.plaza.fi/rapellys-ja-testaus/[0-9]+.*?\.html$', redir)
+        rtmatch = re.search('^http://murobbs.plaza.fi/rapellys-ja-testaus/[0-9]+.*?\.html', redir)
     except Exception as e:
         if type(e) is not ValueError:
             print(url, e)
         return
 
+    def revimg(url):
+        try:
+            googleimg = ('https://www.google.com/'
+                'searchbyimage?&image_url='+urllib.parse.quote(url))
+            req = urllib.request.Request(googleimg)
+            req.add_header('User-Agent', user_agent)
+            result_page = urllib.request.urlopen(req).read()
+            imagedesc = re.search(b'Best guess for this image.*?>(.*?)</a>',
+                result_page, re.M).group(1).decode()
+            print(url, 'img:', imagedesc)
+            return imagedesc
+        except AttributeError:
+            print(url, 'no image description')
+            return
+
 
     if rtmatch:
         with open('modules/each_word/gadnex.login', 'r') as login:
             usr, pw = login.read().split(':')
+        if '#' in url:
+            post_id = url[1+url.index('#'):]
+        else:
+            post_id = ''
         login_url = 'http://murobbs.plaza.fi/login.php?do=login'
         login_headers = {
             'User-Agent': user_agent,
@@ -97,9 +116,14 @@ def run(url):
             else:
                 print(e)
                 return
+        # debug
         with open('rt.html', 'wb') as f:
             f.write(rt)
-        rt = BeautifulSoup(rt.decode('windows-1252'), 'html5lib')
+        try:
+            rt = BeautifulSoup(rt.decode('windows-1252'), 'html5lib')
+        except Exception as e:
+            print(e)
+            rt = BeautifulSoup(rt.decode('windows-1252', 'ignore'), 'html5lib')
         title = rt.title.text.strip()[:-len(' - MuroBBS')]
         posts = rt.find_all('table', {'id': re.compile('post[0-9]*')})
         def post_details(post_n):
@@ -132,7 +156,7 @@ def run(url):
                     'div', {'id': 'post_message_'+posts[post_n].get('id')[4:]}
                 ).children:
                 if hasattr(item, 'get') and item.get('href'):
-                    post_msg.append(str(
+                    post_msg.append('[{0}]({1})'.format(item.text,
                         urllib.parse.unquote(item.get('href')).replace(
                             'http://murobbs.plaza.fi/redirect-to/?redirect=', ''
                         )))
@@ -142,9 +166,13 @@ def run(url):
                     if smilie in smilies:
                         post_msg.append(smilies[smilie])
                     else:
-                        post_msg.append('<{}>'.format(src))
+                        post_msg.append('![{0}]({1})'.format(revimg(src) or '', src))
                 if item.name is None:
-                    post_msg.append(str(item))
+                    msg_len = len(' '.join(post_msg))
+                    if msg_len <= 300:
+                        post_msg.append(str(item)[:(300-msg_len)])
+                    else:
+                        post_msg.append('...')
 
             return {
                 'name': posts[post_n].find('a', {
@@ -155,8 +183,13 @@ def run(url):
 
                 'msg': re.sub('\s+', ' ', ' '.join(post_msg).strip())
             }
-        op = post_details(0)
-        return '{0} {1} {2}\n{3}'.format(op['name'], op['time'], title, op['msg'])
+        try:
+            p_ids = [p.get('id') for p in posts]
+            p = post_details(p_ids.index(post_id) if post_id in p_ids else 0)
+        except Exception as e:
+            print(e)
+            return
+        return '{0} {1} {2}\n{3}'.format(p['name'], p['time'], title, p['msg'])
 
     elif ytmatch:
         # youtube video info
@@ -186,19 +219,8 @@ def run(url):
 
     elif 'image/' in content_type:
         # reverse image search
-        try:
-            googleimg = ('https://www.google.com/'
-                'searchbyimage?&image_url='+urllib.parse.quote(url))
-            req = urllib.request.Request(googleimg)
-            req.add_header('User-Agent', user_agent)
-            result_page = urllib.request.urlopen(req).read()
-            imagedesc = re.search(b'Best guess for this image.*?>(.*?)</a>',
-                result_page, re.M).group(1).decode()
-            print(url, 'img:', imagedesc)
-            return imagedesc
-        except AttributeError:
-            print(url, 'no image description')
-            return
+        return revimg(img)
+
     else:
         # don't block by downloading page before detecting youtube link or image
         page = response.read(1024*1024)
