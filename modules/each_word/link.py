@@ -3,11 +3,15 @@ import urllib.request
 import urllib.parse
 import html.parser
 import json
+import zlib
 from datetime import timedelta
+import html5lib
+from bs4 import BeautifulSoup
 
 def run(url):
     """Return info about an url. Statistics for YouTube videos, 
-    Google reverse image description for images 
+    Google reverse image description for images, 
+    post info for MuroBBS/R&T links 
     and page title for anything else."""
 
     # required for reverse image search and possibly other sites
@@ -27,12 +31,78 @@ def run(url):
         redir = response.geturl()
         ytmatch = re.search('youtube\.com/.*?(?:[\?\&]v=|embed/|v/)(.{11})',
             redir)
+        rtmatch = re.search('^http://murobbs.plaza.fi/rapellys-ja-testaus/', redir)
     except Exception as e:
         if type(e) is not ValueError:
             print(url, e)
         return
 
-    if ytmatch:
+
+    if rtmatch:
+        with open('modules/each_word/gadnex.login', 'r') as login:
+            usr, pw = login.read().split(':')
+        login_url = 'http://murobbs.plaza.fi/login.php?do=login'
+        login_headers = {
+            'User-Agent': user_agent,
+            'Accept': 'text/html',
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'Origin': 'http://murobbs.plaza.fi',
+            'Referer': redir,
+            'Accept-Encoding': 'gzip,deflate'
+        }
+        login_data = urllib.parse.urlencode({
+                'vb_login_username': usr,
+                'vb_login_password': pw,
+                'do': 'login'
+            }).encode()
+
+        def get_info(cookies):
+            rt_headers = dict(login_headers)
+            rt_headers.pop('Origin')
+            rt_headers['Cookie'] = cookies
+            rt_req = urllib.request.Request(redir, headers=rt_headers)
+            rt_resp = urllib.request.urlopen(rt_req)
+            rt_page = zlib.decompress(rt_resp.read(), 16+zlib.MAX_WBITS)
+            return rt_page
+
+        def login():
+            login_req = urllib.request.Request(login_url, login_data, login_headers)
+            login_resp = urllib.request.urlopen(login_req)
+            login_page = zlib.decompress(login_resp.read(), 16+zlib.MAX_WBITS)
+            if b'Olet kirjautunut' in login_page:
+                print('MuroBBS login success!')
+            else:
+                print('MuroBBS login failed.')
+            cookies = '; '.join(
+                    [v.split('; ')[0] for k, v in login_resp.getheaders()
+                    if k == 'Set-Cookie']
+                )
+            with open('modules/each_word/cookies.login', 'w') as c:
+                c.write(cookies)
+            return cookies
+
+        try:
+            with open('modules/each_word/cookies.login', 'r') as c:
+                cookies = c.read()
+            rt = get_info(cookies)
+            if b'Et ole kirjautunut' in rt:
+                rt = get_info(login())
+            if b'Et ole kirjautunut' in rt:
+                return 'Ei voi kirjautua sisään'
+        except Exception as e:
+            if type(e) == FileNotFoundError:
+                rt = get_info(login())
+                if b'Et ole kirjautunut' in rt:
+                    return 'Ei voi kirjautua sisään'
+            else:
+                print(e)
+                return
+        rt = BeautifulSoup(rt.decode('latin-1'))
+        rttitle = rt.title.string.strip()
+        print(rttitle)
+        return rttitle
+
+    elif ytmatch:
         # youtube video info
         try:
             videoid = ytmatch.group(1)
@@ -58,7 +128,7 @@ def run(url):
             print(e)
             return
 
-    if 'image/' in content_type:
+    elif 'image/' in content_type:
         # reverse image search
         try:
             googleimg = ('https://www.google.com/'
@@ -73,28 +143,28 @@ def run(url):
         except AttributeError:
             print(url, 'no image description')
             return
-
-    # don't block by downloading page before detecting youtube link or image
-    page = response.read(1024*1024)
-
-    if encoding is None:
-        # search encoding from meta tag
-        charset = (re.search(b'<meta\s[^>]*?(?<=[\s;])charset=\"?([^;\"\s]+)',
-            page, re.S | re.I))
-        if charset is None:
-            # utf-8 fallback
-            encoding = 'utf-8'
-        else:
-            encoding = charset.group(1).decode()
-
-    title = re.search(b'<title.*?>(.*?)</title>', page, re.S | re.I)
-    print('url: {0} redir: {1} encoding: {2} Title: {3}'.format(
-        url, redir, encoding, bool(title)
-    )) # debug
-    if title is None:
-        return
     else:
-        title = title.group(1).decode(encoding).strip()
-        title = html.parser.HTMLParser().unescape(title)
-        title = re.sub('\s+', ' ', title)
-        return title
+        # don't block by downloading page before detecting youtube link or image
+        page = response.read(1024*1024)
+
+        if encoding is None:
+            # search encoding from meta tag
+            charset = (re.search(b'<meta\s[^>]*?(?<=[\s;])charset=\"?([^;\"\s]+)',
+                page, re.S | re.I))
+            if charset is None:
+                # utf-8 fallback
+                encoding = 'utf-8'
+            else:
+                encoding = charset.group(1).decode()
+
+        title = re.search(b'<title.*?>(.*?)</title>', page, re.S | re.I)
+        print('url: {0} redir: {1} encoding: {2} Title: {3}'.format(
+            url, redir, encoding, bool(title)
+        )) # debug
+        if title is None:
+            return
+        else:
+            title = title.group(1).decode(encoding).strip()
+            title = html.parser.HTMLParser().unescape(title)
+            title = re.sub('\s+', ' ', title)
+            return title

@@ -8,13 +8,6 @@ from optparse import OptionParser
 import sleekxmpp
 from concurrent.futures import ThreadPoolExecutor
 
-# how to include triggers in a module:
-# triggers = ['!something', '!else']
-# also: triggers = {'!smt': 'something'}
-module_triggers = dict()
-eachmsg_modulelist = []
-eachword_modulelist = []
-
 moduledirs = dict(
     (
         folder.split(os.sep)[-1],
@@ -24,6 +17,13 @@ moduledirs = dict(
     for folder, folders, files in os.walk('modules')
     if '__pycache__' not in folder and 'unused' not in folder
 )
+
+# how to include triggers in a module:
+# triggers = ['!something', '!else']
+# also: triggers = {'!smt': 'something'}
+module_triggers = dict()
+eachmsg_modulelist = []
+eachword_modulelist = []
 
 for folder, mlist in moduledirs.items():
     for module in mlist:

@@ -8,4 +8,4 @@ def run(msg):
     for line in chatlog:
         if msg in line:
             return line
-    return ''
+    return
