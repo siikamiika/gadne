@@ -243,7 +243,7 @@ def run(url):
 
     elif 'image/' in content_type:
         # reverse image search
-        return revimg(img)
+        return revimg(url)
 
     else:
         # don't block by downloading page before detecting youtube link or image
