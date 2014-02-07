@@ -5,7 +5,6 @@ import html.parser
 import json
 import zlib
 from datetime import timedelta
-import time
 import html5lib
 from bs4 import BeautifulSoup
 
@@ -15,24 +14,30 @@ def run(url):
     post info for MuroBBS/R&T links 
     and page title for anything else."""
 
-    # required for reverse image search and possibly other sites
-    user_agent = (
-        'Mozilla/5.0 (Windows NT 6.1; WOW64) '
-        'AppleWebKit/537.36 (KHTML, like Gecko) '
-        'Chrome/31.0.1650.57 Safari/537.36'
-        )
+    request_headers = {
+        'Accept': 'text/html,application/xhtml+xml,application/xml;'
+                  'q=0.9,image/webp,*/*;q=0.8',
+        'Accept-Encoding': 'gzip,deflate',
+        'Accept-Language': 'en-US,en;q=0.8,fi;q=0.6',
+        'Cache-Control': 'max-age=0',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) '
+                      'AppleWebKit/537.36 (KHTML, like Gecko) '
+                      'Chrome/31.0.1650.57 Safari/537.36'
+    }
 
     try:
         # collect info from URL
-        request = urllib.request.Request(url)
-        request.add_header('User-Agent', user_agent)
+        request = urllib.request.Request(url, headers=request_headers)
         response = urllib.request.urlopen(request, timeout=10)
         content_type = response.headers['Content-Type'].lower()
         encoding = response.headers.get_content_charset()
         redir = response.geturl()
+        content_encoding = response.headers['Content-Encoding']
         ytmatch = re.search('youtube\.com/.*?(?:[\?\&]v=|embed/|v/)(.{11})',
             redir)
-        rtmatch = re.search('^http://murobbs.plaza.fi/rapellys-ja-testaus/[0-9]+.*?\.html', redir)
+        rtmatch = re.search(
+            '^http://murobbs.plaza.fi/rapellys-ja-testaus/'
+            '[0-9]+.*?\.html', redir)
     except Exception as e:
         if type(e) is not ValueError:
             print(url, e)
@@ -42,9 +47,10 @@ def run(url):
         try:
             googleimg = ('https://www.google.com/'
                 'searchbyimage?&image_url='+urllib.parse.quote(url))
-            req = urllib.request.Request(googleimg)
-            req.add_header('User-Agent', user_agent)
+            req = urllib.request.Request(googleimg, headers=request_headers)
             result_page = urllib.request.urlopen(req, timeout=10).read()
+            if result_page[:2] == b'\x1f\x8b':
+                result_page = zlib.decompress(result_page, 16+zlib.MAX_WBITS)
             imagedesc = re.search(b'Best guess for this image.*?>(.*?)</a>',
                 result_page, re.M).group(1).decode()
             print(url, 'img:', imagedesc)
@@ -68,14 +74,9 @@ def run(url):
         else:
             post_id = ''
         login_url = 'http://murobbs.plaza.fi/login.php?do=login'
-        login_headers = {
-            'User-Agent': user_agent,
-            'Accept': 'text/html',
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'Origin': 'http://murobbs.plaza.fi',
-            'Referer': redir,
-            'Accept-Encoding': 'gzip,deflate'
-        }
+        login_headers = dict(request_headers)
+        login_headers['Content-Type'] = 'application/x-www-form-urlencoded'
+        login_headers['Origin'] = 'http://murobbs.plaza.fi'
         login_data = urllib.parse.urlencode({
                 'vb_login_username': usr,
                 'vb_login_password': pw,
@@ -83,8 +84,7 @@ def run(url):
             }).encode('windows-1252', 'ignore')
 
         def get_page(cookies):
-            rt_headers = dict(login_headers)
-            rt_headers.pop('Origin')
+            rt_headers = dict(request_headers)
             rt_headers['Cookie'] = cookies
             try:
                 rt_req = urllib.request.Request(redir, headers=rt_headers)
@@ -97,7 +97,8 @@ def run(url):
 
         def login():
             try:
-                login_req = urllib.request.Request(login_url, login_data, login_headers)
+                login_req = urllib.request.Request(
+                    login_url, login_data, login_headers)
                 login_resp = urllib.request.urlopen(login_req)
                 login_page = zlib.decompress(login_resp.read(), 16+zlib.MAX_WBITS)
             except Exception as e:
@@ -249,6 +250,10 @@ def run(url):
         # don't block by downloading page before detecting youtube link or image
         try:
             page = response.read(1024*1024)
+            if content_encoding == 'gzip' or page[:2] == b'\x1f\x8b':
+                page = zlib.decompress(page, 16+zlib.MAX_WBITS)
+        except zlib.error:
+            print(url, 'Can\'t decompress page as gzip, fallback to plaintext')
         except Exception as e:
             print(url, e)
             return

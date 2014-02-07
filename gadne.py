@@ -6,7 +6,7 @@ import datetime
 import re
 from optparse import OptionParser
 import sleekxmpp
-from concurrent.futures import ThreadPoolExecutor
+from threading import Thread
 
 moduledirs = dict(
     (
@@ -18,26 +18,15 @@ moduledirs = dict(
     if '__pycache__' not in folder and 'unused' not in folder
 )
 
-# how to include triggers in a module:
-# triggers = ['!something', '!else']
-# also: triggers = {'!smt': 'something'}
-module_triggers = dict()
-eachmsg_modulelist = []
-eachword_modulelist = []
+for ml in moduledirs.values():
+    for m in ml: exec('import '+m)
 
-for folder, mlist in moduledirs.items():
-    for module in mlist:
-        exec('import {}'.format(module))
-        if folder == 'modules':
-            exec('for t in {0}.triggers: module_triggers[t] = {0}'.format(module))
-        elif folder == 'each_msg':
-            exec('eachmsg_modulelist.append({})'.format(module))
-        elif folder == 'each_word':
-            exec('eachword_modulelist.append({})'.format(module))
+m_container = dict(
+    (md, [eval(m) for m in ml])
+    for md, ml in moduledirs.items()
+)
 
 class MUCBot(sleekxmpp.ClientXMPP):
-
-    tp = ThreadPoolExecutor(max_workers=5)
 
     def __init__(self, jid, password, room, nick):
 
@@ -62,32 +51,28 @@ class MUCBot(sleekxmpp.ClientXMPP):
 
         msg_args = msg['body'].split()
 
-        def send(text):
-            self.send_message(mto=msg['from'].bare, mbody=text,
-                mtype='groupchat')
-
-        #def send_back(text):
-        #    self.send_message(mto=msg['from'], mbody=text, mtype='chat')
+        def send(module, text):
+            self.send_message(mto=msg['from'].bare, mbody=module.run(text),
+                    mtype='groupchat')
 
         if len(msg_args) != 0 and msg['mucnick'] != self.nick:
-            time = datetime.datetime.now().strftime('%Y/%m/%d %H:%M:%S ')
-            open('chatlog.log', 'a').write(
-                time+str(msg['from'])+'/'+msg['id']+': '+
-                msg['body'].replace('\n', '')+'\n'
-            )
-
-            for m in eachmsg_modulelist:
-                self.tp.submit(lambda msg=msg: send(m.run(msg)))
-
-            if msg_args[0] in module_triggers:
-                self.tp.submit(lambda msg=msg:
-                        send(module_triggers[msg_args[0]].run(msg))
+            with open('chatlog.log', 'a') as log:
+                log.write('{0} {1}/{2}: {3}\n'.format(
+                    datetime.datetime.now().strftime('%Y/%m/%d %H:%M:%S'),
+                    msg['from'], msg['id'], msg['body'].replace('\n', '')
                     )
+                )
 
-            for w in eachword_modulelist:
+            for m in m_container['each_msg']:
+                Thread(target=send, args=(m, msg)).start()
+
+            for m in m_container['modules']:
+                if msg_args[0] in m.triggers:
+                    Thread(target=send, args=(m, msg)).start()
+
+            for m in m_container['each_word']:
                 for arg in msg_args:
-                    self.tp.submit(lambda arg=arg: send(w.run(arg)))
-
+                    Thread(target=send, args=(m, arg)).start()
 
 if __name__ == '__main__':
 

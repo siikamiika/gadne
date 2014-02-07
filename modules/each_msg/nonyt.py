@@ -7,9 +7,9 @@ def run(msg):
             return 'NO NYT :ghammer:'
         if not re.findall('[a-z]|:', msg['body']) and len(re.findall('[A-Z]', msg['body'])) >= 3:
             return ':kasetti:'
-        if a.lower().startswith('gnu') or a == ':gnu:':
+        if a.lower().startswith('gnu') or ':gnu:' in msg['body']:
             return 'hehe gnu gnu'
-        if a.lower().startswith('mad') or a == ':mad:':
+        if a.lower().startswith('mad') or ':mad:' in msg['body']:
             return ':kasetti:'
         if a.startswith('läski'):
             return ':laihduta:'
