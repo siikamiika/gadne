@@ -151,5 +151,5 @@ class Cleverbot:
             print(args)
 
 def run(msg):
-    msg = msg['body'].lstrip('gadne: ')
+    msg = msg['body'][len('gadne: '):]
     return Cleverbot().ask(msg)

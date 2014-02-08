@@ -56,11 +56,11 @@ class MUCBot(sleekxmpp.ClientXMPP):
                     mtype='groupchat')
 
         if len(msg_args) != 0 and msg['mucnick'] != self.nick:
-            with open('chatlog.log', 'a') as log:
+            with open('chatlog.log', 'ab') as log:
                 log.write('{0} {1}/{2}: {3}\n'.format(
                     datetime.datetime.now().strftime('%Y/%m/%d %H:%M:%S'),
                     msg['from'], msg['id'], msg['body'].replace('\n', '')
-                    )
+                    ).encode()
                 )
 
             for m in m_container['each_msg']:
@@ -101,13 +101,15 @@ if __name__ == '__main__':
         )
 
     optp.add_option("-j", "--jid", dest="jid", help="JID to use")
-    optp.add_option("-p", "--password", dest="password", help="password to use")
+    optp.add_option("-p", "--password", dest="password",
+        help="password to use")
     optp.add_option("-r", "--room", dest="room", help="MUC room to join")
     optp.add_option("-n", "--nick", dest="nick", help="MUC nickname")
 
     opts, args = optp.parse_args()
 
-    logging.basicConfig(level=opts.loglevel, format='%(levelname)-8s %(message)s')
+    logging.basicConfig(level=opts.loglevel,
+        format='%(levelname)-8s %(message)s')
 
     if opts.jid is None:
         opts.jid = input("Username: ")

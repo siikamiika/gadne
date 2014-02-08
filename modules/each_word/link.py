@@ -23,16 +23,16 @@ def run(url):
         'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) '
                       'AppleWebKit/537.36 (KHTML, like Gecko) '
                       'Chrome/31.0.1650.57 Safari/537.36'
-    }
+    }   # aka why user-agent filtering doesn't work
+        # and who could resist Gadne anyway? :-)
 
     try:
-        # collect info from URL
+        # collect info about URL
         request = urllib.request.Request(url, headers=request_headers)
         response = urllib.request.urlopen(request, timeout=10)
         content_type = response.headers['Content-Type'].lower()
         encoding = response.headers.get_content_charset()
         redir = response.geturl()
-        content_encoding = response.headers['Content-Encoding']
         ytmatch = re.search('youtube\.com/.*?(?:[\?\&]v=|embed/|v/)(.{11})',
             redir)
         rtmatch = re.search(
@@ -43,17 +43,25 @@ def run(url):
             print(url, e)
         return
 
+    def decompress(data):
+        try:
+            if data[:2] == b'\x1f\x8b':
+                return zlib.decompress(data, 16+zlib.MAX_WBITS)
+            else:
+                return data
+        except Exception as e:
+            print(e)
+            return data
+
     def revimg(url):
         try:
             googleimg = ('https://www.google.com/'
                 'searchbyimage?&image_url='+urllib.parse.quote(url))
             req = urllib.request.Request(googleimg, headers=request_headers)
             result_page = urllib.request.urlopen(req, timeout=10).read()
-            if result_page[:2] == b'\x1f\x8b':
-                result_page = zlib.decompress(result_page, 16+zlib.MAX_WBITS)
+            result_page = decompress(result_page)
             imagedesc = re.search(b'Best guess for this image.*?>(.*?)</a>',
                 result_page, re.M).group(1).decode()
-            print(url, 'img:', imagedesc)
             return imagedesc
         except AttributeError:
             print(url, 'no image description')
@@ -63,6 +71,7 @@ def run(url):
             return
 
     if rtmatch:
+        # nyt on tuuhea skenaario
         with open('modules/each_word/gadnex.login', 'r') as login:
             try:
                 usr, pw = login.read().split(':')
@@ -70,8 +79,11 @@ def run(url):
                 print('Error reading username and password:', e)
                 return
         if '#' in url:
+            # ja se defaultti posts/page päälle tai tulee rumaa jälkeä
             post_id = url[1+url.index('#'):]
+            # KUULIKKO
         else:
+            # defaulttaa ensimmäiseen viestiin
             post_id = ''
         login_url = 'http://murobbs.plaza.fi/login.php?do=login'
         login_headers = dict(request_headers)
@@ -79,6 +91,7 @@ def run(url):
         login_headers['Origin'] = 'http://murobbs.plaza.fi'
         login_data = urllib.parse.urlencode({
                 'vb_login_username': usr,
+                # moi NSA mun passu on ***** mitäs mieltä
                 'vb_login_password': pw,
                 'do': 'login'
             }).encode('windows-1252', 'ignore')
@@ -89,7 +102,7 @@ def run(url):
             try:
                 rt_req = urllib.request.Request(redir, headers=rt_headers)
                 rt_resp = urllib.request.urlopen(rt_req)
-                rt_page = zlib.decompress(rt_resp.read(), 16+zlib.MAX_WBITS)
+                rt_page = decompress(rt_resp.read())
                 return rt_page
             except Exception as e:
                 print(e)
@@ -100,7 +113,7 @@ def run(url):
                 login_req = urllib.request.Request(
                     login_url, login_data, login_headers)
                 login_resp = urllib.request.urlopen(login_req)
-                login_page = zlib.decompress(login_resp.read(), 16+zlib.MAX_WBITS)
+                login_page = decompress(login_resp.read())
             except Exception as e:
                 print(e)
                 return
@@ -136,17 +149,18 @@ def run(url):
             else:
                 print(e)
                 return
-        # debug
-        #with open('rt.html', 'wb') as f:
-        #    f.write(rt)
+
         try:
             rt = BeautifulSoup(rt.decode('windows-1252'), 'html5lib')
         except Exception as e:
             print(e)
-            rt = BeautifulSoup(rt.decode('windows-1252', 'ignore'), 'html5lib')
+            # ei se mikää tärkee merkki ollu :ghammer:
+            rt = BeautifulSoup(
+                rt.decode('windows-1252', 'ignore'), 'html5lib')
         title = re.sub('\s+', ' ', rt.title.text.strip()[:-len(' - MuroBBS')])
         posts = rt.find_all('table', {'id': re.compile('post[0-9]*')})
         if not posts:
+            # fallback
             return str(title)
 
         def post_details(post_n):
@@ -180,19 +194,26 @@ def run(url):
                 ).children:
 
                 if hasattr(item, 'get') and item.get('href'):
+                    # markdown much
                     post_msg.append('[{0}]({1})'.format(item.text,
                         urllib.parse.unquote(item.get('href')).replace(
-                            'http://murobbs.plaza.fi/redirect-to/?redirect=', ''
+                            'http://murobbs.plaza.fi/redirect-to/?redirect=',
+                            ''
                         )))
                 if hasattr(item, 'get') and item.get('src'):
                     src = item.get('src')
                     smilie = src.replace('http://murobbs.plaza.fi/', '')
                     if smilie in smilies:
+                        # :gcomp:
                         post_msg.append(smilies[smilie])
                     else:
-                        post_msg.append('![{0}]({1})'.format(revimg(src) or '', src))
+                        # img alt filled with reverse image result
+                        post_msg.append('![{0}]({1})'.format(
+                            revimg(src) or '', src))
+                # the "just text" inside the div
                 if item.name is None:
                     msg_len = len(' '.join(post_msg))
+                    # limit message length to 300 chars + links/images
                     if msg_len <= 300:
                         post_msg.append(str(item)[:(300-msg_len)])
                     else:
@@ -214,7 +235,9 @@ def run(url):
         except Exception as e:
             print(e)
             return
-        return '{0} {1} {2}\n{3}'.format(p['name'], p['time'], title, p['msg'])
+        return '{0} {1} {2}\n{3}'.format(
+                p['name'], p['time'], title, p['msg']
+            )
 
     elif ytmatch:
         # youtube video info
@@ -230,9 +253,9 @@ def run(url):
                         (int(video['likeCount'])/video['ratingCount'])*100,
                     2)
             except KeyError:
+                # key not found = no likes/dislikes yet
                 likeratio = '0/0'
 
-            print('YouTube:', videoid)
             return ('Youtube: [{0}] {1} ({2}) | Aihe: {3} / '
                 '{4:,} katselukertaa / likeratio: {5}%').format(
                     video['uploader'], video['title'], kesto,
@@ -247,39 +270,34 @@ def run(url):
         return revimg(url)
 
     else:
-        # don't block by downloading page before detecting youtube link or image
         try:
-            page = response.read(1024*1024)
-            if content_encoding == 'gzip' or page[:2] == b'\x1f\x8b':
-                page = zlib.decompress(page, 16+zlib.MAX_WBITS)
-        except zlib.error:
-            print(url, 'Can\'t decompress page as gzip, fallback to plaintext')
+            page = decompress(response.read(1024*1024))
         except Exception as e:
             print(url, e)
             return
 
-        if encoding is None:
-            # search encoding from meta tag
-            charset = (re.search(b'<meta\s[^>]*?(?<=[\s;])charset=\"?([^;\"\s]+)',
+        if not encoding:
+            # search encoding from meta http-equiv and meta charset
+            charset = (re.search(
+                    b'<meta\s[^>]*?(?<=[\s;])charset=\"?([^;\"\s]+)',
                 page, re.S | re.I))
-            if charset is None:
-                # utf-8 fallback
-                encoding = 'utf-8'
-            else:
+            if charset:
                 try:
                     encoding = charset.group(1).decode()
                 except Exception as e:
                     print(e)
-                    return
 
         title = re.search(b'<title.*?>(.*?)</title>', page, re.S | re.I)
-        print('url: {0} redir: {1} encoding: {2} Title: {3}'.format(
-            url, redir, encoding, bool(title)
-        )) # debug
         if title is None:
             return
         else:
-            title = title.group(1).decode(encoding).strip()
-            title = html.parser.HTMLParser().unescape(title)
+            title = title.group(1)
+            try:
+                title = title.decode(encoding)
+            except Exception as e:
+                print(url, e)
+                # fuck you shitty site
+                title = title.decode('utf-8', 'ignore')
+            title = html.parser.HTMLParser().unescape(title.strip())
             title = re.sub('\s+', ' ', title)
             return title
