@@ -1,29 +1,24 @@
 import sys
 import logging
 import getpass
-import os
 import datetime
 import re
 from optparse import OptionParser
 import sleekxmpp
 from threading import Thread
-
-moduledirs = dict(
-    (
-        folder.split(os.sep)[-1],
-        ['.'.join(os.path.join(folder, f[:-3]).split(os.sep))
-        for f in files if f[-3:] == '.py' and f != '__init__.py']
-    )
-    for folder, folders, files in os.walk('modules')
-    if '__pycache__' not in folder and 'unused' not in folder
-)
-
-for ml in moduledirs.values():
-    for m in ml: exec('import '+m)
+import os
+from importlib import import_module as imp_m
 
 m_container = dict(
-    (md, [eval(m) for m in ml])
-    for md, ml in moduledirs.items()
+    (
+        folder.split(os.sep)[-1],
+        [
+            imp_m('{0}.{1}'.format(folder.replace(os.sep, '.'), f[:-3]))
+            for f in files if f[-3:] == '.py' and f != '__init__.py'
+        ]
+    )
+    for folder, folders, files in os.walk('modules')
+    if folder.split(os.sep)[-1] not in ['__pycache__', 'unused', 'lib']
 )
 
 class MUCBot(sleekxmpp.ClientXMPP):
@@ -49,6 +44,13 @@ class MUCBot(sleekxmpp.ClientXMPP):
 
     def muc_message(self, msg):
 
+        with open('chatlog.log', 'ab') as log:
+            log.write('{0} {1}/{2}: {3}\n'.format(
+                datetime.datetime.now().strftime('%Y/%m/%d %H:%M:%S'),
+                msg['from'], msg['id'], msg['body'].replace('\n', '')
+                ).encode()
+            )
+
         msg_args = msg['body'].split()
 
         def send(module, text):
@@ -56,12 +58,6 @@ class MUCBot(sleekxmpp.ClientXMPP):
                     mtype='groupchat')
 
         if len(msg_args) != 0 and msg['mucnick'] != self.nick:
-            with open('chatlog.log', 'ab') as log:
-                log.write('{0} {1}/{2}: {3}\n'.format(
-                    datetime.datetime.now().strftime('%Y/%m/%d %H:%M:%S'),
-                    msg['from'], msg['id'], msg['body'].replace('\n', '')
-                    ).encode()
-                )
 
             for m in m_container['each_msg']:
                 Thread(target=send, args=(m, msg)).start()
