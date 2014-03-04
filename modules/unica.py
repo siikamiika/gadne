@@ -62,5 +62,9 @@ def run(msg):
             except:
                 pass
         daystrings[day] = re.sub('\s+', ' ', daystring)
+    
+    ret = daystrings.get(paiva)
+    if 'riisi' in ret.lower():
+        ret += '\n"Taas riisiä" :grage:'
+    return ret
 
-    return daystrings.get(paiva)
