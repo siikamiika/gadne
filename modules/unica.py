@@ -15,13 +15,20 @@ triggers = {
     '!mac': 'macciavelli/',
     '!mikro': 'mikro/',
     '!nutri': 'nutritio/',
-    '!rk': 'ruokakello/'
+    '!rk': 'ruokakello/',
+    '!unica': 'self'
 }
 
 def run(msg):
 
     msg_args = msg['body'].split()
     paikka = triggers[msg_args[0]]
+
+    if paikka == 'self':
+        return ', '.join(
+            '{}: {}'.format(t, v) for t, v in triggers.items()
+            if t != '!unica'
+        )
 
     days = ['ma', 'ti', 'ke', 'to', 'pe', 'la', 'su']
     date = datetime.datetime.now()
