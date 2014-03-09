@@ -1,0 +1,2 @@
+#!/bin/bash
+gadnepid=$(pgrep -f "^python3 gadne.py"); ./gadne.sh & kill $gadnepid
