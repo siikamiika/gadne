@@ -11,7 +11,7 @@ triggers = {
     '!delica': 'delica/',
     '!brygge': 'brygge/',
     '!deli': 'deli-pharma/',
-    '!dent': 'dental/',
+    '!dental': 'dental/',
     '!mac': 'macciavelli/',
     '!mikro': 'mikro/',
     '!nutri': 'nutritio/',
