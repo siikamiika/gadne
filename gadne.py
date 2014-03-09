@@ -7,6 +7,7 @@ from optparse import OptionParser
 import sleekxmpp
 from threading import Thread
 import os
+from subprocess import getoutput
 from importlib import import_module as imp_m
 
 m_container = dict(
@@ -41,6 +42,12 @@ class MUCBot(sleekxmpp.ClientXMPP):
                                         # If a room password is needed, use:
                                         # password=the_room_password,
                                         wait=True)
+        lastcommit = getoutput('git log -1 --pretty=%B').strip()
+        self.send_message(
+            mto=self.room,
+            mbody='commit: {}'.format(lastcommit),
+            mtype='groupchat',
+            )
 
     def muc_message(self, msg):
 
