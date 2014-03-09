@@ -1,5 +1,4 @@
 from subprocess import getoutput, Popen
-
 triggers = ['!update']
 
 def run(msg):
