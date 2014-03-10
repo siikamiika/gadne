@@ -46,6 +46,8 @@ def run(msg):
             date += datetime.timedelta(days=1)
         if 'riisi' in ret.lower():
             ret += '\n"Taas riisiä" :grage:'
+        else:
+            ret += '\nja riisiä'
         return ret
     except:
         return 'jotain hajos'
