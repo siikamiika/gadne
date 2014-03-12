@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from modules import unica, sodexo
+from modules import unica, sodexo, spam
 from threading import Thread
 
 triggers = ['!ruoka']
@@ -15,7 +15,7 @@ def run(msg):
         with open(ruokafile, 'w') as f:
             f.write(' '.join([
                 r for r in msg_args[2:]
-                if r in list(unica.triggers) + ['!ict', '!gadne']
+                if r in list(unica.triggers) + ['!ict', '!gadne', '!spam']
             ]))
         return
 
@@ -51,6 +51,8 @@ def run(msg):
             )
         elif paikka == '!gadne':
             ruokalistat.append('gadne: :laihduta:')
+        elif paikka == '!spam':
+            ruokalistat.append('python: {}'.format(spam.run(msg)))
 
     [t.start() for t in threads]
     [t.join() for t in threads]
