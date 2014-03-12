@@ -33,7 +33,7 @@ def run(msg):
             delta = int(msg_args[1])
         except Exception as e:
             if msg_args[1] in daylist:
-                delta = d.weekday() - daylist[msg_args[1]]
+                delta = daylist.index(msg_args[1]) - d.weekday()
 
     def fuck_unica(paikka, delta):
         ruokalistat.append('{}: '.format(paikka[1:])+unica.run(

@@ -72,6 +72,6 @@ def run(msg):
     
     ret = daystrings.get(paiva)
     if 'riisi' in ret.lower():
-        ret += '\n"Taas riisiä" :grage:'
+        ret += ' "Taas riisiä" :grage:'
     return ret
 
