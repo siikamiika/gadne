@@ -16,7 +16,7 @@ triggers = {
     '!mikro': 'mikro/',
     '!nutri': 'nutritio/',
     '!rk': 'ruokakello/',
-    '!unica': 'self'
+    '!unica': None
 }
 
 def run(msg):
@@ -24,7 +24,7 @@ def run(msg):
     msg_args = msg['body'].split()
     paikka = triggers[msg_args[0]]
 
-    if paikka == 'self':
+    if not paikka:
         return ', '.join(
             '{}: {}'.format(t, v) for t, v in triggers.items()
             if t != '!unica'
