@@ -15,7 +15,7 @@ def run(msg):
         with open(ruokafile, 'w') as f:
             f.write(' '.join([
                 r for r in msg_args[2:]
-                if r in list(unica.triggers) + ['!ict']
+                if r in list(unica.triggers) + ['!ict', '!gadne']
             ]))
         return
 
@@ -49,6 +49,8 @@ def run(msg):
             ruokalistat.append('ict '+
                 sodexo.run({'body': '!ict {}'.format(delta)})
             )
+        elif paikka == '!gadne':
+            ruokalistat.append('gadne: :laihduta:')
 
     [t.start() for t in threads]
     [t.join() for t in threads]
