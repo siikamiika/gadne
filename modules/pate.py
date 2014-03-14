@@ -17,7 +17,6 @@ def run(msg):
                 r for r in msg_args[2:]
                 if r in list(unica.triggers) + ['!ict', '!gadne', '!spam']
             ]))
-        return
 
     try:
         with open(ruokafile, 'r') as f:
@@ -31,7 +30,9 @@ def run(msg):
     else:
         try:
             delta = int(msg_args[1])
-        except Exception as e:
+        except IndexError:
+            pass
+        except ValueError:
             if msg_args[1] in daylist:
                 delta = daylist.index(msg_args[1]) - d.weekday()
 
