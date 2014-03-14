@@ -7,7 +7,7 @@ from optparse import OptionParser
 import sleekxmpp
 from threading import Thread
 import os
-from subprocess import getoutput
+from subprocess import getoutput, Popen
 from importlib import import_module as imp_m
 
 m_container = dict(
@@ -32,6 +32,8 @@ class MUCBot(sleekxmpp.ClientXMPP):
         self.nick = nick
         self.add_event_handler("session_start", self.start)
         self.add_event_handler("groupchat_message", self.muc_message)
+
+        self.locked = False
 
     def start(self, event):
 
@@ -64,7 +66,19 @@ class MUCBot(sleekxmpp.ClientXMPP):
             self.send_message(mto=msg['from'].bare, mbody=module.run(text),
                     mtype='groupchat')
 
-        if len(msg_args) != 0 and msg['mucnick'] != self.nick:
+        if len(msg_args) and msg['mucnick'] != self.nick and not self.locked:
+
+            if msg_args[0] == '!update':
+                status = getoutput('git pull')
+                if status == 'Already up-to-date.':
+                     self.send_message(
+                        mto=self.room,
+                        mbody='ei uusia committeja KUULIKKO :ghammer:',
+                        mtype='groupchat',
+                        )
+                else:
+                    self.locked = True
+                    Popen('./update &', shell=True)
 
             for m in m_container['each_msg']:
                 Thread(target=send, args=(m, msg)).start()
