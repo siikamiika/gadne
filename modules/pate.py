@@ -45,6 +45,7 @@ def run(msg):
     for paikka in favs:
         if paikka in unica.triggers:
             threads.append(Thread(target=fuck_unica, args=(paikka, delta)))
+            threads[-1].start()
         elif paikka == '!ict':
             ruokalistat.append('ict '+
                 sodexo.run({'body': '!ict {}'.format(delta)})
@@ -54,7 +55,7 @@ def run(msg):
         elif paikka == '!spam':
             ruokalistat.append('python: {}'.format(spam.run(msg)))
 
-    [t.start() for t in threads]
-    [t.join() for t in threads]
+    for t in threads:
+        t.join()
     
     return '\n'.join(ruokalistat)
