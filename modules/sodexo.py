@@ -30,9 +30,8 @@ def run(msg):
         while 1:
             ruokalista = json.loads(urllib.request.urlopen(
                     'http://www.sodexo.fi/ruokalistat/output/daily_json/54/'
-                    '{0}/{1}/{2}/fi'\
-                    .format(str(date.year), str(date.month), str(date.day)
-                )).read().decode())
+                    '{0}/{1}/{2}/fi'.format(date.year, date.month, date.day)
+                ).read().decode())
             ret += days[date.weekday()] + ': '
             for ruoka in ruokalista['courses']:
                 ret += '| {0}{1} |'.format(

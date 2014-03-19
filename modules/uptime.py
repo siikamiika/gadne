@@ -8,7 +8,7 @@ def run(msg):
     target = msg['body'].split()
     if len(target[1:]):
         if target[1] == 'eddykk':
-            uptime_ = urlopen('https://eddykaykay.pw/uptime_gadne.php').read()
+            uptime_ = urlopen('https://eddykk.com/uptime_gadne.php').read()
     try:
         if uptime_:
             uptime = uptime_
