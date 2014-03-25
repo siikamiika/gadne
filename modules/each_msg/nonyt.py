@@ -26,4 +26,4 @@ def run(msg):
             'ramsay', 'snow', 'greyjoy', 'davos', 'theon', 'baratheon',
             'roose', 'targaryen', 'bronn', 'drogo', 'stark', 'varys',
             'baelish', 'jaime', 'khal', 'robert', 'talisa', 'thrones'}:
-            return '\n'.join(('EI SPOILATA :kasetti:' for _ in range(30)))
+            return 30*'EI SPOILATA :kasetti:\n' + msg['mucnick'] + ' perkele'
