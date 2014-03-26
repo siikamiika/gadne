@@ -74,7 +74,7 @@ def run(url):
         # nyt on tuuhea skenaario
         with open('modules/each_word/gadnex.login', 'r') as login:
             try:
-                usr, pw = login.read().split(':')
+                usr, pw = login.read().split('\n')[:2]
             except Exception as e:
                 print('Error reading username and password:', e)
                 return
