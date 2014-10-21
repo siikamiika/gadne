@@ -24,12 +24,18 @@ def run(msg):
     results = []
     # vitun dict :kasetti:
     for key, value in commits.items():
-        for commit in value:
+        # Enumerate homoilut koska halutaan laittaa \n
+        # kaikkiin muihin paitsi vikaan :agree:
+        for i, commit in enumerate(value):
             results.append("{} commited into '{}' at {}:\n'{}' {}".format(
                 commit['author'],
                 commit['name'],
                 commit['gitstamp'],
                 commit['message'],
                 commit['url']))
+            # ollaanko vielä lopussa? :o
+            if i != len(value) - 1:
+                results.append("\n")
+    results = ''.join(results)
 
     return results
