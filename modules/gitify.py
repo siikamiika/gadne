@@ -10,7 +10,7 @@ def run(msg):
     try:
         password = os.environ['githomo']
     except KeyError:
-        quit('githomo environment variable not specified KUULIKKO')
+        return 'githomo environment variable not specified KUULIKKO'
 
     # WTF
     password_mgr = urllib.request.HTTPPasswordMgrWithDefaultRealm()
@@ -20,22 +20,10 @@ def run(msg):
     opener = urllib.request.build_opener(handler)
     # /WTF
     data = opener.open(topUrl).read().decode()
-    commits = json.loads(data)
-    results = []
-    # vitun dict :kasetti:
-    for key, value in commits.items():
-        # Enumerate homoilut koska halutaan laittaa \n
-        # kaikkiin muihin paitsi vikaan :agree:
-        for i, commit in enumerate(value):
-            results.append("{} committed into '{}' at {}:\n'{}' {}".format(
-                commit['author'],
-                commit['name'],
-                commit['gitstamp'],
-                commit['message'],
-                commit['url']))
-            # ollaanko vielä lopussa? :o
-            if i != len(value) - 1:
-                results.append("\n")
-    results = ''.join(results)
-
-    return results
+    commits = json.loads(data)['commits']
+    return  '\n'.join(["{} committed into '{}' at {}:\n'{}' {}".format(
+            commit['author'],
+            commit['name'],
+            commit['gitstamp'],
+            commit['message'],
+            commit['url']) for commit in commits])
