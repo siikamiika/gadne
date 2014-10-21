@@ -27,7 +27,7 @@ def run(msg):
         # Enumerate homoilut koska halutaan laittaa \n
         # kaikkiin muihin paitsi vikaan :agree:
         for i, commit in enumerate(value):
-            results.append("{} commited into '{}' at {}:\n'{}' {}".format(
+            results.append("{} committed into '{}' at {}:\n'{}' {}".format(
                 commit['author'],
                 commit['name'],
                 commit['gitstamp'],
