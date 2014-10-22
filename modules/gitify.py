@@ -14,12 +14,14 @@ def run(msg):
 
     topUrl = 'http://gitify.fisle.eu/get'
     # Nyt katsetaan se määrä
-    count = msg['body'].split()[1]
-    if count:
+    try:
+        count = msg['body'].split()[1]
         try:
             topUrl = '{}/{}'.format(topUrl, int(count))
         except ValueError:
             return 'Olet homo jos luet tämän :cool:'
+    except IndexError:
+        pass
 
     # WTF
     password_mgr = urllib.request.HTTPPasswordMgrWithDefaultRealm()
