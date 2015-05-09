@@ -239,31 +239,31 @@ def run(url):
                 p['name'], p['time'], title, p['msg']
             )
 
-    elif ytmatch:
-        # youtube video info
-        try:
-            videoid = ytmatch.group(1)
-            jsondata = json.loads(urllib.request.urlopen(
-                'http://gdata.youtube.com/feeds/api/videos/'
-                '{}?v=2&alt=jsonc'.format(videoid)).read().decode())
-            video = jsondata['data']
-            kesto = timedelta(seconds=video['duration'])
-            try:
-                likeratio = round(
-                        (int(video['likeCount'])/video['ratingCount'])*100,
-                    2)
-            except KeyError:
-                # key not found = no likes/dislikes yet
-                likeratio = '0/0'
+    # elif ytmatch:
+    #     # youtube video info
+    #     try:
+    #         videoid = ytmatch.group(1)
+    #         jsondata = json.loads(urllib.request.urlopen(
+    #             'http://gdata.youtube.com/feeds/api/videos/'
+    #             '{}?v=2&alt=jsonc'.format(videoid)).read().decode())
+    #         video = jsondata['data']
+    #         kesto = timedelta(seconds=video['duration'])
+    #         try:
+    #             likeratio = round(
+    #                     (int(video['likeCount'])/video['ratingCount'])*100,
+    #                 2)
+    #         except KeyError:
+    #             # key not found = no likes/dislikes yet
+    #             likeratio = '0/0'
 
-            return ('Youtube: [{0}] {1} ({2}) | Aihe: {3} / '
-                '{4:,} katselukertaa / likeratio: {5}%').format(
-                    video['uploader'], video['title'], kesto,
-                    video['category'], video['viewCount'], likeratio
-                )
-        except Exception as e:
-            print(e)
-            return
+    #         return ('Youtube: [{0}] {1} ({2}) | Aihe: {3} / '
+    #             '{4:,} katselukertaa / likeratio: {5}%').format(
+    #                 video['uploader'], video['title'], kesto,
+    #                 video['category'], video['viewCount'], likeratio
+    #             )
+    #     except Exception as e:
+    #         print(e)
+    #         return
 
     elif 'image/' in content_type:
         # reverse image search
