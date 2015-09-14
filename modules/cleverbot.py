@@ -20,6 +20,7 @@ class Cleverbot:
         , 'Accept-Charset' : 'ISO-8859-1,utf-8;q=0.7,*;q=0.7'
         , 'Accept-Language' : 'en-us,en;q=0.8,en-us;q=0.5,en;q=0.3'
         , 'Cache-Control' : 'no-cache'
+        , 'Cookie': 'XVIS=TEI939AFFIAGAYQZ'
         , 'Host' : HOST
         , 'Referer' : PROTOCOL + HOST + '/'
         , 'Pragma' : 'no-cache'
@@ -137,11 +138,15 @@ class Cleverbot:
 
         parsed = [e.split('\r') for e in text.decode().split('\r\r\r\r\r\r')[:-1]]
 
+        def purkka(fn):
+            try: return fn()
+            except: return None
+
         return \
             { 'answer' : parsed[0][0]
             , 'conversation_id' : parsed[0][1]
-            , 'conversation_log_id' : parsed[0][2]
-            , 'unknown': parsed[1][-1]
+            , 'conversation_log_id' : purkka(lambda: parsed[0][2])
+            , 'unknown': purkka(lambda: parsed[1][-1])
             }
 
     def __debug(self, *args):
