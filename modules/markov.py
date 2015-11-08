@@ -140,7 +140,7 @@ def run(msg):
                 for l in chatlog.read().splitlines()
                 if '/{}/'.format(nick) in l])
 
-        markovLength = 5
+        markovLength = 3
         buildMapping(wordlist(source_text), markovLength)
 
         return genSentence(markovLength)
