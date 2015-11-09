@@ -136,9 +136,14 @@ def run(msg):
         nick = msg_args[1]
 
         with open('chatlog.log', 'rb') as chatlog:
-            source_text = '. '.join([l.split(maxsplit=3)[3]
-                for l in chatlog.read().decode().splitlines()
-                if '/{}/'.format(nick) in l])
+            source_text = []
+            for l in chatlog.read().decode().splitlines():
+                if '/{}/'.format(nick) in l:
+                    l = l.split(None, 3)
+                    if len(l) == 4:
+                        l = l[3]
+                        source_text.append(l)
+            source_text = '. '.join(source_text)
 
         markovLength = 3
         buildMapping(wordlist(source_text), markovLength)
