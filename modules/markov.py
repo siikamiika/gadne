@@ -135,9 +135,9 @@ def run(msg):
 
         nick = msg_args[1]
 
-        with open('chatlog.log', 'r') as chatlog:
+        with open('chatlog.log', 'rb') as chatlog:
             source_text = '. '.join([l.split(maxsplit=3)[3]
-                for l in chatlog.read().splitlines()
+                for l in chatlog.read().decode().splitlines()
                 if '/{}/'.format(nick) in l])
 
         markovLength = 3
