@@ -22,30 +22,11 @@ mapping = {}
 # Contains the set of words that can start sentences
 starts = []
 
-# We want to be able to compare words independent of their capitalization.
-def fixCaps(word):
-    # Ex: "FOO" -> "foo"
-    if word.isupper() and word != "I":
-        word = word.lower()
-        # Ex: "LaTeX" => "Latex"
-    elif word [0].isupper():
-        word = word.lower().capitalize()
-        # Ex: "wOOt" -> "woot"
-    else:
-        word = word.lower()
-    return word
-
 # Tuples can be hashed; lists can't.  We need hashable values for dict keys.
 # This looks like a hack (and it is, a little) but in practice it doesn't
 # affect processing time too negatively.
 def toHashKey(lst):
     return tuple(lst)
-
-# Returns the contents of the file, split into a list of words and
-# (some) punctuation.
-def wordlist(text):
-    wordlist = [fixCaps(w) for w in re.findall(r"[\w']+|[.,!?;]", text)]
-    return wordlist
 
 # Self-explanatory -- adds "word" to the "tempMapping" dict under "history".
 # tempMapping (and mapping) both match each word to a list of possible next
@@ -77,7 +58,7 @@ def buildMapping(wordlist, markovLength):
             history = wordlist[i - markovLength + 1 : i + 1]
         follow = wordlist[i + 1]
         # if the last elt was a period, add the next word to the start list
-        if history[-1] == "." and follow not in ".,!?;":
+        if history[-1] == '\n':
             starts.append(follow)
         addItemToTempMapping(history, follow)
     # Normalize the values in tempMapping, put them into mapping
@@ -105,10 +86,10 @@ def next(prevList):
 def genSentence(markovLength):
     # Start with a random "starting word"
     curr = random.choice(starts)
-    sent = curr.capitalize()
+    sent = curr
     prevList = [curr]
-    # Keep adding words until we hit a period
-    while (curr not in "."):
+    # Keep adding words until we hit a newline
+    while (curr not in "\n"):
         curr = next(prevList)
         prevList.append(curr)
         # if the prevList has gotten too long, trim it
@@ -117,7 +98,7 @@ def genSentence(markovLength):
         if (curr not in ".,!?;"):
             sent += " " # Add spaces between words (but not punctuation)
         sent += curr
-    return sent
+    return sent[:-1]
 
 def run(msg):
 
@@ -144,10 +125,11 @@ def run(msg):
                     if len(l) == 4:
                         l = l[3]
                         source_text.append(l)
-            source_text = '. '.join(source_text)
+            source_text = '\n'.join(source_text)
 
-        markovLength = 2
-        buildMapping(wordlist(source_text), markovLength)
+        markovLength = 1
+
+        buildMapping(re.findall(r'[^\s]+|[\n]', source_text), markovLength)
 
         return genSentence(markovLength)
 
