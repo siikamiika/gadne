@@ -138,6 +138,7 @@ def run(msg):
         with open('chatlog.log', 'rb') as chatlog:
             source_text = []
             for l in chatlog.read().decode().splitlines():
+                if '!markov' in l: continue
                 if '/{}/'.format(nick) in l:
                     l = l.split(None, 3)
                     if len(l) == 4:
@@ -145,7 +146,7 @@ def run(msg):
                         source_text.append(l)
             source_text = '. '.join(source_text)
 
-        markovLength = 3
+        markovLength = 2
         buildMapping(wordlist(source_text), markovLength)
 
         return genSentence(markovLength)
