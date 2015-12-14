@@ -4,7 +4,7 @@ triggers = ['!wc', '!ewc']
 
 def run(cmd):
 
-    pattern = cmd['body'].split(maxsplit=1)
+    pattern = cmd['body'].split(None, 1)
     if len(pattern) > 1:
         pattern = pattern[1]
     else:
@@ -18,19 +18,22 @@ def run(cmd):
 
     counter = dict()
 
+    re_options = 0
+
     if cmd['body'].split()[0] == '!wc':
         if pattern == '':
             pattern = '^.*?$'
         else:
-            pattern = re.escape(pattern)
+            pattern = r'(?:^|(?<=\s)){}(?:$|(?=\s))'.format(re.escape(pattern))
+            re_options |= re.IGNORECASE
 
-    pattern = re.compile(pattern)
+    pattern = re.compile(pattern, re_options)
 
     for row in chatlog.splitlines():
         if re.search('!e?wc', row):
             continue
 
-        row = row.split(maxsplit=3)
+        row = row.split(None, 3)
         nick = row[2].split('/')[1]
         msg = row[3]
 
