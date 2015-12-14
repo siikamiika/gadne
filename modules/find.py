@@ -35,7 +35,7 @@ def run(cmd):
         if [t for t in triggers if t in line]:
             continue
 
-        line = line.split(None, 3)
+        line = line.split(None, 3) + ['']
         time = ' '.join(line[0:2])
         nick = line[2].split('/')[1]
         msg = line[3]

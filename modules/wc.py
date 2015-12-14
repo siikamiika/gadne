@@ -33,7 +33,7 @@ def run(cmd):
         if re.search('!e?wc', row):
             continue
 
-        row = row.split(None, 3)
+        row = row.split(None, 3) + ['']
         nick = row[2].split('/')[1]
         msg = row[3]
 
