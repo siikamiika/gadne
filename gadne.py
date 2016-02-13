@@ -82,8 +82,12 @@ class MUCBot(sleekxmpp.ClientXMPP):
 
             if msg_args[0] == '!help':
                 if len(msg_args) == 1:
+                    modulenames = []
+                    for m in m_container['modules']:
+                        modulenames += [_mn[1:] for _mn in m.triggers if _mn.startswith('!')]
                     return self.send_message(mto=self.room,
-                        mbody='usage: !help modulename', mtype='groupchat')
+                        mbody='usage: !help modulename\nmodules: {}'.format(', '.join(modulenames)),
+                        mtype='groupchat')
                 module_name = msg_args[1]
                 for m in m_container['modules']:
                     if '!{}'.format(module_name) in m.triggers:
