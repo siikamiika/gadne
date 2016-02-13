@@ -2,6 +2,9 @@ import re
 import random
 
 triggers = ['!markov']
+HELP = \
+"""!markov <nick>
+Generate a random message based on <nick>'s past messages using markov chains."""
 
 # https://github.com/hrs/markov-sentence-generator
 

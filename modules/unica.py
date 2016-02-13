@@ -19,6 +19,11 @@ triggers = {
     '!rk': 'ruokakello/',
     '!unica': None
 }
+HELP = \
+"""!<restaurant> [day offset|day name abbreviation in finnish]
+!<restaurant>: <restaurant> menu today
+!<restaurant> 1: <restaurant> menu tomorrow
+!<restaurant> pe: <restaurant> menu next friday (perjantai)"""
 
 def run(msg):
 

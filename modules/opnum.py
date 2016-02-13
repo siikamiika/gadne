@@ -1,6 +1,7 @@
 import os
 
 triggers = ['!opnum']
+HELP = '!opnum [<nick>|set 12345]'
 
 def run(msg):
     msg_args = msg['body'].split()
@@ -17,6 +18,3 @@ def run(msg):
                     return f.read()
             else:
                 return '(not set)'
-    else:
-        return 'usage: !opnum [<nick>|set 12345]'
-

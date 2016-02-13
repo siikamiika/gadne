@@ -80,6 +80,23 @@ class MUCBot(sleekxmpp.ClientXMPP):
                     self.locked = True
                     Popen('./update &', shell=True)
 
+            if msg_args[0] == '!help':
+                if len(msg_args) == 1:
+                    return self.send_message(mto=self.room,
+                        mbody='usage: !help modulename', mtype='groupchat')
+                module_name = msg_args[1]
+                for m in m_container['modules']:
+                    if '!{}'.format(module_name) in m.triggers:
+                        if hasattr(m, 'HELP'):
+                            self.send_message(mto=self.room, mbody=m.HELP, mtype='groupchat')
+                        else:
+                            self.send_message(mto=self.room,
+                                mbody='no HELP set for this module', mtype='groupchat')
+                        return
+                else:
+                    return self.send_message(mto=self.room,
+                        mbody='module {} doesn\'t exist'.format(module_name), mtype='groupchat')
+
             for m in m_container['each_msg']:
                 Thread(target=send, args=(m, msg)).start()
 

@@ -1,6 +1,10 @@
 import re
 
 triggers = ['!wc', '!ewc']
+HELP = \
+"""!wc <word or words>, !ewc <pattern>
+!wc: how many times <word or words> has been mentioned (whitespace delimited; doesn't count "examplee" as "example")
+!ewc: regex enabled"""
 
 def run(cmd):
 

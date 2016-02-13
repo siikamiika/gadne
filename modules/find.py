@@ -1,6 +1,13 @@
 import re
 
 triggers = ['!find', '!rfind', '!efind', '!refind', '!erfind']
+HELP = \
+"""!r?e?find [index] <string>
+!rfind: Reverse
+!efind: rEgex
+!refind: both
+!find 5 text: the fifth message that has 'text'
+!find \\5 text: the first message that has '5 text'"""
 
 def run(cmd):
 
