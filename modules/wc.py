@@ -34,7 +34,7 @@ def run(cmd):
     pattern = re.compile(pattern, re_options)
 
     for row in chatlog.splitlines():
-        if re.search('!e?wc', row):
+        if re.match('!e?wc', row):
             continue
 
         row = row.split(None, 3) + ['']
