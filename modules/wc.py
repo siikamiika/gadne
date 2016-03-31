@@ -24,9 +24,14 @@ def run(cmd):
 
     re_options = 0
 
-    if cmd['body'].split()[0] == '!wc':
+    count_commands = False
+
+    if pattern.startswith('!'):
+        pattern = r'^' + re.escape(pattern) + r'.*'
+        count_commands = True
+    elif cmd['body'].split()[0] == '!wc':
         if pattern == '':
-            pattern = '^.*?$'
+            pattern = r'^.*?$'
         else:
             pattern = r'(?:^|(?<=\s)){}(?:$|(?=\s))'.format(re.escape(pattern))
             re_options |= re.IGNORECASE
@@ -34,12 +39,13 @@ def run(cmd):
     pattern = re.compile(pattern, re_options)
 
     for row in chatlog.splitlines():
-        if re.match('!e?wc.*', row):
-            continue
 
         row = row.split(None, 3) + ['']
         nick = row[2].split('/')[1]
         msg = row[3]
+
+        if not count_commands and re.match('!.*', msg):
+            continue
 
         matches = pattern.findall(msg)
 
