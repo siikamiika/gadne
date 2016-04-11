@@ -10,3 +10,4 @@ sleekxmpp/
 *.ruoka
 *.login
 *.html
+twitterconfig.py
