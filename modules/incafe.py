@@ -30,7 +30,7 @@ def run(msg):
     try:
         source = urllib.request.urlopen('http://www.incafe.fi/2').read().decode('ISO-8859-1')
         soup = BeautifulSoup(source, 'html5lib')
-        header = soup.find('h2', string=longDays[day]).find_parent('div', class_='madpages_component ksk_no_margins')
+        header = soup.find('h2', text=longDays[day]).find_parent('div', class_='madpages_component ksk_no_margins')
         menu = header.find_next_sibling('div', class_='madpages_component ksk_no_margins').table
         courses = []
         for course in menu('tr'):
