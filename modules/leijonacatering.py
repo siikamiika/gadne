@@ -32,19 +32,22 @@ def run(msg):
         else:
             paiva = date.weekday()
 
-    leijona = urllib.request.urlopen(
-            BASEURL+paikka
-        ).read().decode()
-    soppa = BeautifulSoup(leijona, 'html5lib')
     pvm_re = re.compile(r'.*?(\d+)\.(\d+)\.(\d+).*')
     ateria_re = re.compile(r'(Aamiainen|Lounas|Päivällinen|Iltapala): (.*?)\. ?')
-    menuitems = [
-        dict(
-            pvm=datetime(*[int(d) for d in reversed(pvm_re.match(i.find('title').text).groups())]),
-            ateriat=[a for a in ateria_re.findall(i.find('description').text)]
-        )
-        for i in soppa.find_all('item') if i.find('title').text.strip().endswith('Varusmiesten ruokalista')
-    ]
+
+    menuitems = []
+    for week in '12':
+        leijona = urllib.request.urlopen(
+                '{}{}/{}'.format(BASEURL, week, paikka)
+            ).read().decode()
+        soppa = BeautifulSoup(leijona, 'html5lib')
+        menuitems += [
+            dict(
+                pvm=datetime(*[int(d) for d in reversed(pvm_re.match(i.find('title').text).groups())]),
+                ateriat=[a for a in ateria_re.findall(i.find('description').text)]
+            )
+            for i in soppa.find_all('item') if i.find('title').text.strip().endswith('Varusmiesten ruokalista')
+        ]
     return (
         ['{}: {}'.format(WEEKDAYS_ABBR[paiva], ' | '.join('{}: {}'.format(a[0], a[1])
             for a in i['ateriat'])) for i in menuitems if i['pvm'].date() == date.date()]
