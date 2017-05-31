@@ -48,7 +48,7 @@ def covfefe(word):
     if not last_consonant:
         return word
 
-    repeat_consonant = TOGGLE_VOICED[last_consonant.lower()]
+    repeat_consonant = TOGGLE_VOICED.get(last_consonant.lower()) or last_consonant
     if last_consonant.isupper():
         repeat_consonant = repeat_consonant.upper()
     output.append((repeat_consonant + (repeat_vowel or previous_vowel))*2)
