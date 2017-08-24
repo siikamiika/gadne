@@ -9,5 +9,5 @@ twitter = Twython(config['consumer_key'],
                     config['access_token_secret'])
 
 def run(msg):
-    message = msg['body']
+    message = msg['body'].split(None, 1)[1]
     twitter.update_status(status=message)
