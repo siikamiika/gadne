@@ -3,6 +3,7 @@ from urllib.parse import urlencode
 from hashlib import md5
 from time import time
 from io import StringIO
+import re
 import requests
 
 triggers = ['gadne:']
@@ -38,6 +39,8 @@ class Cleverbot(object):
         self.xai_prefix = ''
         self.xai_body = ''
 
+        self.language = 'en'
+
         self.first = True
 
         self.debug = debug
@@ -47,6 +50,7 @@ class Cleverbot(object):
 
     def ask(self, text):
         if self.first:
+            self.language = self._detect_language(text)
             request_url = '{}?uc=UseOfficialCleverbotAPI&'.format(self.API_URL) # no I won't
         else:
             request_url = self._make_request_url(text)
@@ -114,8 +118,25 @@ class Cleverbot(object):
         return ''.join(text)
 
     def _detect_language(self, text):
-        if text:
-            return 'en'
+        lang = 'en'
+
+        if 'ä' in text or 'ö' in text:
+            lang = 'fi'
+        elif 'å' in text:
+            lang = 'sv'
+        elif re.search(u'[\u0400-\u04FF]', text):
+            lang = 'ru'
+        elif re.search(u'[\u3041-\u309F\u30A1-\u30FA]', text):
+            lang = 'ja'
+        elif re.search(u'[\uAC00-\uD7A3]', text):
+            lang = 'ko'
+        elif re.search(u'[\u2E80-\u2FD5\u3400-\u4DBF\u4E00-\u9FCC]', text):
+            lang = 'zh'
+
+        if self.debug:
+            print(lang, file=sys.stderr)
+
+        return lang
 
     def _make_request_url(self, text):
         data = [
@@ -147,7 +168,7 @@ class Cleverbot(object):
         data += [('vText{}'.format(i + 2), self._format_text(self._encode_text_for_message(m)))
                  for i, m in enumerate(reversed(self.message_history))]
         data += [
-            ('cb_settings_language', self._detect_language(text)),
+            ('cb_settings_language', self.language),
             ('cb_settings_scripting', 'no'),
             ('sessionid', self.cb_conv_id),
             ('islearning', '1'),
