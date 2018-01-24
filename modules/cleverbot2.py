@@ -12,7 +12,7 @@ class Cleverbot(object):
     HOST = 'www.cleverbot.com'
     PROTOCOL = 'http'
     RESOURCE = '/webservicemin'
-    API_URL = f'{PROTOCOL}://{HOST}{RESOURCE}'
+    API_URL = '{}://{}{}'.format(PROTOCOL, HOST, RESOURCE)
 
     TIMEOUT = 5 * 60
 
@@ -47,7 +47,7 @@ class Cleverbot(object):
 
     def ask(self, text):
         if self.first:
-            request_url = f'{self.API_URL}?uc=UseOfficialCleverbotAPI&' # no I won't
+            request_url = '{}?uc=UseOfficialCleverbotAPI&'.format(self.API_URL) # no I won't
         else:
             request_url = self._make_request_url(text)
 
@@ -89,7 +89,7 @@ class Cleverbot(object):
 
     def _get_index(self):
         """Sets the XVIS cookie"""
-        self.session.get(f'{self.PROTOCOL}://{self.HOST}/')
+        self.session.get('{}://{}/'.format(self.PROTOCOL, self.HOST))
 
     def _set_cookie(self, name, value):
         self.session.cookies.set(name, value, domain=self.HOST, path='/')
@@ -99,7 +99,7 @@ class Cleverbot(object):
         text.replace('|', '{*}')
         for c in text:
             if ord(c) > 0xff:
-                result.write(f'|{ord(c):02x}')
+                result.write('|{:02x}'.format(ord(c)))
             else:
                 result.write(c)
 
@@ -124,7 +124,7 @@ class Cleverbot(object):
             ('in', self._format_text(text)),
             ('bot', 'c'),
             ('cbsid', self.cb_conv_id),
-            ('xai', self.xai_prefix + f',{self.xai_body}' * bool(self.xai_body)),
+            ('xai', self.xai_prefix + ',{}'.format(self.xai_body) * bool(self.xai_body)),
             ('ns', self.request_count),
             ('al', ''),
             ('dl', ''),
@@ -138,12 +138,12 @@ class Cleverbot(object):
             ('xed', ''),
         ]
 
-        return f'{self.API_URL}?{urlencode(data)}'
+        return '{}?{}'.format(self.API_URL, urlencode(data))
 
     def _make_post_request_body(self, text):
         data = [
             ('stimulus', self._format_text(self._encode_text_for_message(text))),
-            *[(f'vText{i + 2}', self._format_text(self._encode_text_for_message(m)))
+            *[('vText{}'.format(i + 2), self._format_text(self._encode_text_for_message(m)))
               for i, m in enumerate(reversed(self.message_history))],
             ('cb_settings_language', self._detect_language(text)),
             ('cb_settings_scripting', 'no'),
