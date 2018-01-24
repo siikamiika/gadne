@@ -53,6 +53,8 @@ class Cleverbot(object):
             self.language = self._detect_language(text)
             request_url = '{}?uc=UseOfficialCleverbotAPI&'.format(self.API_URL) # no I won't
         else:
+            if self.language == 'en':
+                self.language = self._detect_language(text)
             request_url = self._make_request_url(text)
 
         if self.debug:
