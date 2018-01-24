@@ -33,6 +33,7 @@ class MUCBot(sleekxmpp.ClientXMPP):
         self.add_event_handler("session_start", self.start)
         self.add_event_handler("groupchat_message", self.muc_message)
 
+        self.cleverbot = None
         self.locked = False
 
     def start(self, event):
@@ -63,8 +64,13 @@ class MUCBot(sleekxmpp.ClientXMPP):
         msg_args = msg['body'].split()
 
         def send(module, text):
-            self.send_message(mto=msg['from'].bare, mbody=module.run(text),
-                    mtype='groupchat')
+            if hasattr(module, 'triggers') and 'gadne:' in module.triggers:
+                message_body, self.cleverbot = module.run(text, self.cleverbot)
+                self.send_message(mto=msg['from'].bare,
+                    mbody=message_body, mtype='groupchat')
+            else:
+                self.send_message(mto=msg['from'].bare, mbody=module.run(text),
+                        mtype='groupchat')
 
         if len(msg_args) and msg['mucnick'] != self.nick and not self.locked:
 
