@@ -102,7 +102,7 @@ class Cleverbot(object):
 
     def _encode_text_for_message(self, text):
         result = StringIO()
-        text.replace('|', '{*}')
+        text = text.replace('|', '{*}')
         for c in text:
             if ord(c) > 0xff:
                 result.write('|{:04x}'.format(ord(c)))
