@@ -143,8 +143,10 @@ class Cleverbot(object):
     def _make_post_request_body(self, text):
         data = [
             ('stimulus', self._format_text(self._encode_text_for_message(text))),
-            *[('vText{}'.format(i + 2), self._format_text(self._encode_text_for_message(m)))
-              for i, m in enumerate(reversed(self.message_history))],
+        ]
+        data += [('vText{}'.format(i + 2), self._format_text(self._encode_text_for_message(m)))
+                 for i, m in enumerate(reversed(self.message_history))]
+        data += [
             ('cb_settings_language', self._detect_language(text)),
             ('cb_settings_scripting', 'no'),
             ('sessionid', self.cb_conv_id),
