@@ -105,7 +105,7 @@ class Cleverbot(object):
         text.replace('|', '{*}')
         for c in text:
             if ord(c) > 0xff:
-                result.write('|{:02x}'.format(ord(c)))
+                result.write('|{:04x}'.format(ord(c)))
             else:
                 result.write(c)
 
