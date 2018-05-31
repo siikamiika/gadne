@@ -287,17 +287,9 @@ def run(url):
                 except Exception as e:
                     print(e)
 
-        title = re.search(b'<title.*?>(.*?)</title>', page, re.S | re.I)
-        if title is None:
-            return
-        else:
-            title = title.group(1)
-            try:
-                title = title.decode(encoding)
-            except Exception as e:
-                print(url, e)
-                # fuck you shitty site
-                title = title.decode('utf-8', 'ignore')
-            title = html.parser.HTMLParser().unescape(title.strip())
-            title = re.sub('\s+', ' ', title)
-            return title
+        try:
+            soup = BeautifulSoup(page, 'html5lib')
+            return soup.title.text
+        # lol
+        except:
+            pass

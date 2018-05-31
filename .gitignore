@@ -11,3 +11,4 @@ sleekxmpp/
 *.login
 *.html
 twitterconfig.py
+Session.vim
