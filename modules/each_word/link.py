@@ -289,7 +289,7 @@ def run(url):
 
         try:
             soup = BeautifulSoup(page, 'html5lib')
-            return soup.title.text
+            return soup.title.text.strip()
         # lol
         except:
             pass
